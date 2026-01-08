@@ -1,0 +1,96 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator dbml {
+  provider            = "prisma-dbml-generator"
+  projectDatabaseType = "PostgreSQL"
+}
+
+model User {
+  id                  Int       @id @default(autoincrement())
+  email               String    @unique
+  password            String
+  referral_code       String?
+  referred_by_code    String?
+  is_verified         Boolean   @default(false)
+  is_disabled         Boolean   @default(false)
+  level               String?   @db.Char(1)
+  team_turnover       Float     @default(0)
+  point               Float     @default(0)
+  membership_due_date DateTime?
+
+  // Relations
+  profile UserProfile?
+  tokens  Token[]
+
+  rankId Int?
+  rank   Rank? @relation(fields: [rankId], references: [id])
+
+  packageId Int?
+  package   Package? @relation(fields: [packageId], references: [id])
+
+  @@map("users")
+}
+
+model UserProfile {
+  id            Int      @id @default(autoincrement())
+  first_name    String
+  last_name     String
+  date_of_birth DateTime
+  userId        Int      @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+enum TokenType {
+  VERIFICATION
+  PASSWORD_RESET
+}
+
+model Token {
+  id         Int       @id @default(autoincrement())
+  token      String    @unique
+  type       TokenType
+  expires_at DateTime
+  userId     Int
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("tokens")
+}
+
+model Rank {
+  id                   Int    @id @default(autoincrement())
+  name                 String
+  slug                 String @unique
+  min_direct_members   Int
+  min_indirect_members Int
+  min_turnover         Int
+  order                Int
+  cumulative_percent   Float
+  max_turnover_per_leg Int
+
+  // Back relation
+  users User[]
+
+  @@map("ranks")
+}
+
+model Package {
+  id    Int    @id @default(autoincrement())
+  slug  String @unique
+  name  String
+  price Float
+
+  // Back relation
+  users User[]
+
+  @@map("packages")
+}
