@@ -5,15 +5,16 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { MailService } from '../mail/mail.service';
+import { MailService } from '../utils/mail/mail.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { TokenType } from 'src/generated/client';
-import { normalizeEmail } from '../utils/email.util';
+import { normalizeEmail } from '../utils/helpers';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +22,10 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private mailService: MailService,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(AuthService.name);
+  }
 
   async register(dto: RegisterDto) {
     const email = normalizeEmail(dto.email);
@@ -29,7 +33,6 @@ export class AuthService {
       where: { email },
     });
 
-    console.log({ existingUser });
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }

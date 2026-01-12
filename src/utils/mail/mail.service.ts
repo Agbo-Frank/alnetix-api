@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
 import * as nodemailer from 'nodemailer';
 import * as handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
+import { AppConfigService } from '../env';
 
 @Injectable()
 export class MailService {
   private transporter: nodemailer.Transporter;
 
-  constructor() {
-    const secure = process.env.SMTP_SECURE
-      ? process.env.SMTP_SECURE === 'true'
-      : Number(process.env.SMTP_PORT) === 465; // true for 465, false for other ports
+  constructor(
+    private readonly logger: PinoLogger,
+    private readonly env: AppConfigService,
+  ) {
+    this.logger.setContext(MailService.name);
+    const secure = this.env.smtpSecure;
 
-    console.log({ port: Number(process.env.SMTP_PORT), secure });
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
+      host: this.env.smtpHost,
+      port: this.env.smtpPort,
       secure: secure,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
+        user: this.env.smtpUser,
+        pass: this.env.smtpPassword,
       },
       debug: true,
       logger: true,
@@ -52,7 +55,7 @@ export class MailService {
   }
 
   async sendVerificationEmail(email: string, firstName: string, token: string) {
-    const url = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+    const url = `${this.env.frontendUrl}/verify-email?token=${token}`;
     const html = this.renderTemplate('verification', {
       firstName,
       url,
@@ -75,15 +78,14 @@ export class MailService {
     html: string;
   }) {
     try {
-      console.log({ html });
       await this.transporter.sendMail({
-        from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+        from: `"${this.env.mailFromName}" <${this.env.mailFromAddress}>`,
         to: email,
         subject,
         html,
       });
     } catch (error) {
-      console.error('SMTP email error:', error);
+      this.logger.error({ err: error, email, subject }, 'SMTP email error');
       throw error;
     }
   }
@@ -93,7 +95,7 @@ export class MailService {
     firstName: string,
     token: string,
   ) {
-    const url = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const url = `${this.env.frontendUrl}/reset-password?token=${token}`;
     const html = this.renderTemplate('password-reset', {
       firstName,
       url,
