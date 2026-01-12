@@ -1,0 +1,75 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table users {
+  id Int [pk, increment]
+  email String [unique, not null]
+  password String [not null]
+  referral_code String
+  referred_by_code String
+  is_verified Boolean [not null, default: false]
+  is_disabled Boolean [not null, default: false]
+  level String
+  team_turnover Float [not null, default: 0]
+  point Float [not null, default: 0]
+  membership_due_date DateTime
+  profile user_profiles
+  tokens tokens [not null]
+  rankId Int
+  rank ranks
+  packageId Int
+  package packages
+}
+
+Table user_profiles {
+  id Int [pk, increment]
+  first_name String [not null]
+  last_name String [not null]
+  date_of_birth DateTime [not null]
+  userId Int [unique, not null]
+  user users [not null]
+}
+
+Table tokens {
+  id Int [pk, increment]
+  token String [unique, not null]
+  type TokenType [not null]
+  expires_at DateTime [not null]
+  userId Int [not null]
+  user users [not null]
+}
+
+Table ranks {
+  id Int [pk, increment]
+  name String [not null]
+  slug String [unique, not null]
+  min_direct_members Int [not null]
+  min_indirect_members Int [not null]
+  min_turnover Int [not null]
+  order Int [not null]
+  cumulative_percent Float [not null]
+  max_turnover_per_leg Int [not null]
+  users users [not null]
+}
+
+Table packages {
+  id Int [pk, increment]
+  slug String [unique, not null]
+  name String [not null]
+  price Float [not null]
+  users users [not null]
+}
+
+Enum TokenType {
+  VERIFICATION
+  PASSWORD_RESET
+}
+
+Ref: users.rankId > ranks.id
+
+Ref: users.packageId > packages.id
+
+Ref: user_profiles.userId - users.id [delete: Cascade]
+
+Ref: tokens.userId > users.id [delete: Cascade]
