@@ -16,40 +16,44 @@ import { CreatePaymentDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, Pagination, PaginationParams } from '../utils';
 import { CoinPaymentIPN } from './coinpayment/coinpayment.interface';
+import type { User } from 'src/generated/client';
 
 @Controller('payments')
-@UseGuards(JwtAuthGuard)
 export class PaymentsController {
   constructor(
     private readonly paymentsService: PaymentsService,
   ) { }
 
   @Get('checkout')
+  @UseGuards(JwtAuthGuard)
   async getCheckoutDetails(
-    @CurrentUser() user: { id: number },
+    @CurrentUser() user: User,
   ) {
     return this.paymentsService.getCheckoutDetails(user.id);
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async createPayment(
-    @CurrentUser() user: { id: number },
+    @CurrentUser() user: User,
     @Body() dto: CreatePaymentDto,
   ) {
     return this.paymentsService.createPayment(user.id, dto);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getUserPayments(
-    @CurrentUser() user: { id: number },
+    @CurrentUser() user: User,
     @Pagination() pagination: PaginationParams,
   ) {
     return this.paymentsService.getUserPayments(user.id, pagination);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   async getPayment(
-    @CurrentUser() user: { id: number },
+    @CurrentUser() user: User,
     @Param('id', ParseIntPipe) paymentId: number,
   ) {
     return this.paymentsService.getPaymentById(paymentId, user.id);

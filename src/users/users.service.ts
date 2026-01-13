@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findOne(id: number) {
     const user = await this.prisma.user.findUnique({
@@ -13,10 +13,11 @@ export class UsersService {
         rank: true,
         package: true,
       },
+      omit: {
+        password: true
+      }
     });
 
-    // @ts-expect-error delete password from user object
-    delete user?.password;
     return user;
   }
 }
