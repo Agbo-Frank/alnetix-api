@@ -54,12 +54,12 @@ export class PaymentsService {
         .map((pkg) => ({
           id: pkg.id,
           slug: pkg.slug,
+          description: pkg.description,
           name: pkg.name,
           price: pkg.price - currentPackagePrice
         }));
     }
 
-    // Get supported currencies from CoinPayment
     const supportedCurrencies = await this.coinPaymentService.getSupportedCurrencies();
 
     return {
