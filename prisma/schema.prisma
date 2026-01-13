@@ -108,10 +108,11 @@ model Rank {
 }
 
 model Package {
-  id    Int    @id @default(autoincrement())
-  slug  String @unique
-  name  String
-  price Float
+  id          Int    @id @default(autoincrement())
+  slug        String @unique
+  name        String
+  description String?
+  price       Float
 
   // Back relation
   users User[]

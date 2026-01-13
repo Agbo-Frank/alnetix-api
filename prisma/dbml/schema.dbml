@@ -58,6 +58,7 @@ Table packages {
   id Int [pk, increment]
   slug String [unique, not null]
   name String [not null]
+  description String
   price Float [not null]
   users users [not null]
 }

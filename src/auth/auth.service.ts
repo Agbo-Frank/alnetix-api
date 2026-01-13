@@ -39,12 +39,17 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const referralCode = await this.generateReferralCode(
+      dto.firstName,
+      dto.lastName,
+      dto.dateOfBirth,
+    );
 
     const user = await this.prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-
+        referral_code: referralCode,
         referred_by_code: dto.referralCode,
         profile: {
           create: {
@@ -215,6 +220,30 @@ export class AuthService {
       message:
         'Password reset successful. You can now log in with your new password.',
     };
+  }
+
+  private async generateReferralCode(
+    firstName: string,
+    lastName: string,
+    dateOfBirth: string,
+  ): Promise<string> {
+    const firstInitial = firstName.trim().charAt(0).toUpperCase();
+    const lastInitial = lastName.trim().charAt(0).toUpperCase();
+
+    const dobDate = dayjs(dateOfBirth);
+    const datePart = dobDate.format('YYYYMMDD');
+
+    const prefix = `${firstInitial}${lastInitial}-${datePart}`;
+
+    const count = await this.prisma.user.count({
+      where: {
+        referral_code: {
+          startsWith: prefix,
+        },
+      }
+    });
+
+    return `${prefix}-${count + 1}`;
   }
 
   private async createToken(
