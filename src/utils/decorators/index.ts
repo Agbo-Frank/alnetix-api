@@ -1,8 +1,19 @@
 import { createParamDecorator, ExecutionContext, BadRequestException } from '@nestjs/common';
+import { IsOptional, IsInt, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export interface PaginationParams {
-  page: number;
-  limit: number;
+export class PaginationParams {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 20;
 }
 
 export const CurrentUser = createParamDecorator(

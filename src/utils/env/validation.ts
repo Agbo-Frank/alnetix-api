@@ -47,6 +47,9 @@ class EnvironmentVariables {
   @IsUrl({ require_protocol: true })
   FRONTEND_URL: string;
 
+  @IsUrl({ require_protocol: true })
+  BACKEND_URL: string;
+
   @IsEmail()
   MAIL_FROM_ADDRESS: string;
 
@@ -65,6 +68,26 @@ class EnvironmentVariables {
 
   @IsString()
   COINPAYMENT_IPN_SECRET: string;
+
+  @IsString()
+  @IsOptional()
+  AWS_ENDPOINT?: string;
+
+  @IsString()
+  @IsOptional()
+  AWS_REGION?: string;
+
+  @IsString()
+  @IsOptional()
+  AWS_ACCESS_KEY_ID?: string;
+
+  @IsString()
+  @IsOptional()
+  AWS_SECRET_ACCESS_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  AWS_S3_BUCKET?: string;
 }
 
 export function validate(config: Record<string, unknown>) {

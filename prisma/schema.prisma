@@ -25,11 +25,17 @@ model User {
   team_turnover       Float     @default(0)
   point               Float     @default(0)
   membership_due_date DateTime?
+  commission_earned   Float     @default(0)
+  commission_balance  Float     @default(0)
+  is_active           Boolean   @default(true)
+  wallet_address      String?
 
   // Relations
   profile UserProfile?
   tokens  Token[]
   payments Payment[]
+  earnedCommissions Commission[] @relation("EarnedCommissions")
+  customerCommissions Commission[] @relation("CustomerCommissions")
 
   rankId Int?
   rank   Rank? @relation(fields: [rankId], references: [id])
@@ -45,6 +51,7 @@ model UserProfile {
   first_name    String
   last_name     String
   date_of_birth DateTime
+  image String?
   userId        Int      @unique
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -77,6 +84,11 @@ enum CommissionStatus {
   NOT_ELIGIBLE
   ELIGIBLE
   COMPLETED
+}
+
+enum CommissionType {
+  affiliate
+  unstoppable
 }
 
 model Token {
@@ -135,6 +147,7 @@ model Payment {
   updated_at        DateTime        @updatedAt
 
   items             PaymentItem[]
+  commissions       Commission[]
 
   @@map("payments")
 }
@@ -149,4 +162,27 @@ model PaymentItem {
   referenceId Int?
 
   @@map("payment_items")
+}
+
+model Commission {
+  id            Int            @id @default(autoincrement())
+  type          CommissionType
+  userId        Int
+  user          User           @relation("EarnedCommissions", fields: [userId], references: [id])
+  customerId   Int
+  customer      User           @relation("CustomerCommissions", fields: [customerId], references: [id])
+  paymentId    Int
+  payment       Payment        @relation(fields: [paymentId], references: [id])
+  position      String
+  commission    Float
+  percentage    Float
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([type])
+  @@index([userId])
+  @@index([customerId])
+  @@index([paymentId])
+  @@index([createdAt])
+  @@map("commissions")
 }

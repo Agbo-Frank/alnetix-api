@@ -49,6 +49,10 @@ export class AppConfigService {
     return this.configService.get<string>('FRONTEND_URL') || '';
   }
 
+  get backendUrl(): string {
+    return this.configService.get<string>('BACKEND_URL') || '';
+  }
+
   get mailFromName(): string {
     return this.configService.get<string>('MAIL_FROM_NAME') || '';
   }
@@ -70,11 +74,31 @@ export class AppConfigService {
   }
 
   get ipnUrl(): string {
-    return `${this.frontendUrl}/api/payments/webhook/coinpayment`;
+    return `${this.backendUrl}/payments/webhook/coinpayment`;
   }
 
   get coinpaymentIpnSecret(): string {
     return this.configService.get<string>('COINPAYMENT_IPN_SECRET') || '';
+  }
+
+  get awsEndpoint(): string {
+    return this.configService.get<string>('AWS_ENDPOINT') || '';
+  }
+
+  get awsRegion(): string {
+    return this.configService.get<string>('AWS_REGION') || 'us-east-1';
+  }
+
+  get awsAccessKeyId(): string {
+    return this.configService.get<string>('AWS_ACCESS_KEY_ID') || '';
+  }
+
+  get awsSecretAccessKey(): string {
+    return this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '';
+  }
+
+  get awsS3Bucket(): string {
+    return this.configService.get<string>('AWS_S3_BUCKET') || '';
   }
 }
 

@@ -4,7 +4,6 @@ import {
   Post,
   Body,
   Param,
-  Query,
   UseGuards,
   ParseIntPipe,
   HttpCode,
@@ -66,9 +65,7 @@ export class PaymentsController {
     @Headers('hmac') hmac: string,
   ) {
     try {
-      await this.paymentsService.handleCoinPaymentWebhook(ipnData, hmac);
-
-      return 'OK';
+      return this.paymentsService.handleCoinPaymentWebhook(ipnData, hmac);
     } catch (error) {
       throw error;
     }

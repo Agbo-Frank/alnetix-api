@@ -6,3 +6,13 @@
 export const normalizeEmail = (email: string): string => {
   return email.toLowerCase().trim();
 };
+
+export const paginate = (data: any, total: number, page: number, limit: number) => {
+  return {
+    items: data,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+};

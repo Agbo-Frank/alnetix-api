@@ -106,13 +106,16 @@ export class AuthService {
 
     const payload = { sub: user.id, email: user.email };
     return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.profile?.first_name,
-        lastName: user.profile?.last_name,
-      },
+      message: 'Login successful',
+      data: {
+        access_token: this.jwtService.sign(payload),
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.profile?.first_name,
+          lastName: user.profile?.last_name,
+        },
+      }
     };
   }
 
@@ -132,7 +135,7 @@ export class AuthService {
 
     await this.prisma.token.delete({ where: { id: tokenRecord.id } });
 
-    return { message: 'Email verified successfully. You can now log in.' };
+    return { message: 'Email verified successfully. You can now log in.', data: null };
   }
 
   async resendVerification(email: string) {
@@ -162,7 +165,7 @@ export class AuthService {
       token,
     );
 
-    return { message: 'Verification email resent.' };
+    return { message: 'Verification email resent.', data: null };
   }
 
   async forgotPassword(email: string) {
@@ -177,6 +180,7 @@ export class AuthService {
       return {
         message:
           'If an account exists with this email, a reset link has been sent.',
+        data: null,
       };
     }
 
@@ -195,6 +199,7 @@ export class AuthService {
     return {
       message:
         'If an account exists with this email, a reset link has been sent.',
+      data: null,
     };
   }
 
@@ -219,6 +224,7 @@ export class AuthService {
     return {
       message:
         'Password reset successful. You can now log in with your new password.',
+      data: null,
     };
   }
 

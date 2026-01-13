@@ -10,12 +10,12 @@ import { CoinPaymentService, } from './coinpayment/coinpayment.service';
 import { CoinPaymentIPN } from './coinpayment/coinpayment.interface';
 import {
   CreatePaymentDto,
-  CheckoutDetailsResponseDto,
 } from './dto';
 import { PaymentStatus, PaymentItemType, PaymentProvider, CommissionStatus } from 'src/generated/enums';
 import { AppConfigService } from '../utils/env';
+import { CommissionsService } from '../commissions/commissions.service';
 import dayjs from 'dayjs';
-import { PaginationParams } from 'src/utils';
+import { paginate, PaginationParams } from 'src/utils';
 
 @Injectable()
 export class PaymentsService {
@@ -24,6 +24,7 @@ export class PaymentsService {
     private readonly coinPaymentService: CoinPaymentService,
     private readonly env: AppConfigService,
     private readonly logger: PinoLogger,
+    private readonly commissionsService: CommissionsService,
   ) {
     this.logger.setContext(PaymentsService.name);
   }
@@ -31,7 +32,7 @@ export class PaymentsService {
   /**
    * Get checkout details including packages, and payment currencies
    */
-  async getCheckoutDetails(userId: number): Promise<CheckoutDetailsResponseDto> {
+  async getCheckoutDetails(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: { package: true },
@@ -62,10 +63,11 @@ export class PaymentsService {
 
     const supportedCurrencies = await this.coinPaymentService.getSupportedCurrencies();
 
-    return {
+    const data = {
       supportedCurrencies,
       availablePackages
     };
+    return { message: 'Checkout details fetched successfully', data };
   }
 
   /**
@@ -193,7 +195,7 @@ export class PaymentsService {
   /**
    * Handle CoinPayment webhook
    */
-  async handleCoinPaymentWebhook(ipn: CoinPaymentIPN, hmac: string): Promise<void> {
+  async handleCoinPaymentWebhook(ipn: CoinPaymentIPN, hmac: string) {
     this.logger.info(
       { txn_id: ipn.txn_id, status: ipn.status, status_text: ipn.status_text },
       'Processing CoinPayment webhook',
@@ -225,10 +227,6 @@ export class PaymentsService {
     });
 
     if (!payment) {
-      this.logger.warn(
-        { txn_id: ipn.txn_id },
-        'Payment not found for webhook',
-      );
       return;
     }
 
@@ -268,6 +266,8 @@ export class PaymentsService {
       { paymentId: updatedPayment.id, status: newStatus },
       'Payment status updated from webhook',
     );
+
+    return { message: 'Payment status updated successfully', data: null };
   }
 
   /**
@@ -295,9 +295,16 @@ export class PaymentsService {
       await this.prisma.payment.update({
         where: { id: payment.id },
         data: {
-          commission_status: CommissionStatus.ELIGIBLE, // Add your business logic here
+          commission_status: CommissionStatus.ELIGIBLE,
         },
       });
+
+      // Distribute commissions
+      await this.commissionsService.distributeCommissions(
+        payment.userId,
+        payment.id,
+        payment.amount,
+      );
 
       return;
     } catch (error) {
@@ -328,12 +335,8 @@ export class PaymentsService {
       }),
     ]);
 
-    return {
-      payments,
-      page,
-      limit,
-      total,
-    };
+    const data = paginate(payments, total, page, limit);
+    return { message: 'Payments fetched successfully', data };
   }
 
   async getPaymentById(paymentId: number, userId: number) {
