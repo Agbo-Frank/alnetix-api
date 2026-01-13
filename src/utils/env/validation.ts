@@ -52,6 +52,19 @@ class EnvironmentVariables {
 
   @IsString()
   MAIL_FROM_NAME: string;
+
+  @IsString()
+  COINPAYMENT_PUBLIC_KEY: string;
+
+  @IsString()
+  COINPAYMENT_PRIVATE_KEY: string;
+
+  @IsString()
+  @IsOptional()
+  COINPAYMENT_MERCHANT_ID?: string;
+
+  @IsString()
+  COINPAYMENT_IPN_SECRET: string;
 }
 
 export function validate(config: Record<string, unknown>) {
