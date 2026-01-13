@@ -8,13 +8,15 @@ export const COMMISSION_CONSTANTS = {
   indirect: 2, // 2% for level 2+ (indirect)
 
   // Maximum depth for affiliate commission distribution
-  AFFILIATE_LEVEL_DEPTH: 6,
-
-  // Kickback percentages (for future use)
-  kickback: {
-    basic: 10, // 10%
-    plus: 20, // 20%
-    pro: 50, // 50%
-    proplus: 100, // 100%
-  },
+  AFFILIATE_LEVEL_DEPTH: 2,
+  levels: [
+    {
+      level: 1,
+      percentage: 8,
+    },
+    {
+      level: 2,
+      percentage: 2,
+    },
+  ]
 } as const;

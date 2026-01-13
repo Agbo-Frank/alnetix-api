@@ -4,8 +4,8 @@ export default async function seedRanks(prisma: PrismaClient) {
   console.log('Seeding ranks...');
   const ranks = [
     {
+      id: 'pool-1',
       name: 'Pool 1',
-      slug: 'pool-1',
       min_direct_members: 3,
       min_indirect_members: 0,
       min_turnover: 3000,
@@ -14,8 +14,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 1000,
     },
     {
+      id: 'pool-2',
       name: 'Pool 2',
-      slug: 'pool-2',
       min_direct_members: 4,
       min_indirect_members: 5,
       min_turnover: 6000,
@@ -24,8 +24,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 2500,
     },
     {
+      id: 'pool-3',
       name: 'Pool 3',
-      slug: 'pool-3',
       min_direct_members: 4,
       min_indirect_members: 10,
       min_turnover: 12000,
@@ -34,8 +34,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 5000,
     },
     {
+      id: 'pool-4',
       name: 'Pool 4',
-      slug: 'pool-4',
       min_direct_members: 5,
       min_indirect_members: 25,
       min_turnover: 25000,
@@ -44,8 +44,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 10000,
     },
     {
+      id: 'pool-5',
       name: 'Pool 5',
-      slug: 'pool-5',
       min_direct_members: 5,
       min_indirect_members: 50,
       min_turnover: 50000,
@@ -54,8 +54,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 25000,
     },
     {
+      id: 'pool-6',
       name: 'Pool 6',
-      slug: 'pool-6',
       min_direct_members: 5,
       min_indirect_members: 150,
       min_turnover: 1000000,
@@ -64,8 +64,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 50000,
     },
     {
+      id: 'pool-7',
       name: 'Pool 7',
-      slug: 'pool-7',
       min_direct_members: 6,
       min_indirect_members: 150,
       min_turnover: 250000,
@@ -74,8 +74,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 50000,
     },
     {
+      id: 'pool-8',
       name: 'Pool 8',
-      slug: 'pool-8',
       min_direct_members: 6,
       min_indirect_members: 150,
       min_turnover: 500000,
@@ -84,8 +84,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 50000,
     },
     {
+      id: 'pool-9',
       name: 'Pool 9',
-      slug: 'pool-9',
       min_direct_members: 7,
       min_indirect_members: 150,
       min_turnover: 1000000,
@@ -94,8 +94,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 50000,
     },
     {
+      id: 'pool-10',
       name: 'Pool 10',
-      slug: 'pool-10',
       min_direct_members: 7,
       min_indirect_members: 150,
       min_turnover: 2500000,
@@ -107,11 +107,11 @@ export default async function seedRanks(prisma: PrismaClient) {
 
   for (const rank of ranks) {
     await prisma.rank.upsert({
-      where: { slug: rank.slug },
+      where: { id: rank.id },
       update: {},
       create: rank,
     });
-    console.log(`✓ Seeded rank: ${rank.name} (${rank.slug}) - Order: ${rank.order}`);
+    console.log(`✓ Seeded rank: ${rank.name} (${rank.id}) - Order: ${rank.order}`);
   }
   console.log('Seed completed successfully!');
 }
