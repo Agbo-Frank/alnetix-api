@@ -23,7 +23,7 @@ Table users {
   payments payments [not null]
   earnedCommissions commissions [not null]
   customerCommissions commissions [not null]
-  rankId Int
+  rankId String
   rank ranks
   packageId Int
   package packages
@@ -49,9 +49,8 @@ Table tokens {
 }
 
 Table ranks {
-  id Int [pk, increment]
+  id String [pk]
   name String [not null]
-  slug String [unique, not null]
   min_direct_members Int [not null]
   min_indirect_members Int [not null]
   min_turnover Int [not null]

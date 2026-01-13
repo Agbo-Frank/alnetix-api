@@ -37,7 +37,7 @@ model User {
   earnedCommissions Commission[] @relation("EarnedCommissions")
   customerCommissions Commission[] @relation("CustomerCommissions")
 
-  rankId Int?
+  rankId String?
   rank   Rank? @relation(fields: [rankId], references: [id])
 
   packageId Int?
@@ -103,9 +103,8 @@ model Token {
 }
 
 model Rank {
-  id                   Int    @id @default(autoincrement())
+  id                   String @id
   name                 String
-  slug                 String @unique
   min_direct_members   Int
   min_indirect_members Int
   min_turnover         Int
