@@ -1,17 +1,13 @@
-import { IsInt, IsString, IsOptional, Min } from 'class-validator';
-import { Package } from 'src/generated/client';
+import { IsInt, IsString, IsOptional, IsNotEmpty } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreatePaymentDto {
   @IsInt()
-  @Min(1)
+  @IsNotEmpty({ message: 'packageId is required' })
   packageId: number;
 
   @IsString()
   @IsOptional()
-  currency?: string; // Optional: defaults to USD, can specify crypto currency
-}
-
-export class CheckoutDetailsResponseDto {
-  availablePackages: Package[];
-  supportedCurrencies: string[];
+  @Transform(({ value }) => value || 'USD')
+  currency?: string = 'USD';
 }

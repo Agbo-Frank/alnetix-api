@@ -14,9 +14,15 @@ Table users {
   team_turnover Float [not null, default: 0]
   point Float [not null, default: 0]
   membership_due_date DateTime
+  commission_earned Float [not null, default: 0]
+  commission_balance Float [not null, default: 0]
+  is_active Boolean [not null, default: true]
+  wallet_address String
   profile user_profiles
   tokens tokens [not null]
   payments payments [not null]
+  earnedCommissions commissions [not null]
+  customerCommissions commissions [not null]
   rankId Int
   rank ranks
   packageId Int
@@ -28,6 +34,7 @@ Table user_profiles {
   first_name String [not null]
   last_name String [not null]
   date_of_birth DateTime [not null]
+  image String
   userId Int [unique, not null]
   user users [not null]
 }
@@ -77,6 +84,7 @@ Table payments {
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   items payment_items [not null]
+  commissions commissions [not null]
 }
 
 Table payment_items {
@@ -87,6 +95,22 @@ Table payment_items {
   name String [not null]
   amount Float [not null]
   referenceId Int
+}
+
+Table commissions {
+  id Int [pk, increment]
+  type CommissionType [not null]
+  userId Int [not null]
+  user users [not null]
+  customerId Int [not null]
+  customer users [not null]
+  paymentId Int [not null]
+  payment payments [not null]
+  position String [not null]
+  commission Float [not null]
+  percentage Float [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
 }
 
 Enum TokenType {
@@ -117,6 +141,11 @@ Enum CommissionStatus {
   COMPLETED
 }
 
+Enum CommissionType {
+  affiliate
+  unstoppable
+}
+
 Ref: users.rankId > ranks.id
 
 Ref: users.packageId > packages.id
@@ -128,3 +157,9 @@ Ref: tokens.userId > users.id [delete: Cascade]
 Ref: payments.userId > users.id [delete: Cascade]
 
 Ref: payment_items.paymentId > payments.id [delete: Cascade]
+
+Ref: commissions.userId > users.id
+
+Ref: commissions.customerId > users.id
+
+Ref: commissions.paymentId > payments.id

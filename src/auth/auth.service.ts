@@ -30,12 +30,20 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const email = normalizeEmail(dto.email);
-    const existingUser = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findFirst({
       where: { email },
     });
 
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
+    }
+
+    const referrer = await this.prisma.user.findFirst({
+      where: { referral_code: dto.referralCode },
+    });
+
+    if (!referrer) {
+      throw new ConflictException('Referrer code is invalid');
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -78,7 +86,7 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const email = normalizeEmail(dto.email);
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: { email },
       include: { profile: true },
     });
@@ -106,13 +114,16 @@ export class AuthService {
 
     const payload = { sub: user.id, email: user.email };
     return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.profile?.first_name,
-        lastName: user.profile?.last_name,
-      },
+      message: 'Login successful',
+      data: {
+        access_token: this.jwtService.sign(payload),
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.profile?.first_name,
+          lastName: user.profile?.last_name,
+        },
+      }
     };
   }
 
@@ -132,7 +143,7 @@ export class AuthService {
 
     await this.prisma.token.delete({ where: { id: tokenRecord.id } });
 
-    return { message: 'Email verified successfully. You can now log in.' };
+    return { message: 'Email verified successfully. You can now log in.', data: null };
   }
 
   async resendVerification(email: string) {
@@ -162,7 +173,7 @@ export class AuthService {
       token,
     );
 
-    return { message: 'Verification email resent.' };
+    return { message: 'Verification email resent.', data: null };
   }
 
   async forgotPassword(email: string) {
@@ -177,6 +188,7 @@ export class AuthService {
       return {
         message:
           'If an account exists with this email, a reset link has been sent.',
+        data: null,
       };
     }
 
@@ -195,6 +207,7 @@ export class AuthService {
     return {
       message:
         'If an account exists with this email, a reset link has been sent.',
+      data: null,
     };
   }
 
@@ -219,6 +232,7 @@ export class AuthService {
     return {
       message:
         'Password reset successful. You can now log in with your new password.',
+      data: null,
     };
   }
 

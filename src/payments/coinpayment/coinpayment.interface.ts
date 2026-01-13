@@ -22,6 +22,8 @@ export interface CoinPaymentTransactionResult {
   timeout: number;
   status_url: string;
   qrcode_url: string;
+  checkout_url: string;
+
 }
 
 export interface CoinPaymentTransactionResponse {

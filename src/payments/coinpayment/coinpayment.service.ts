@@ -159,17 +159,6 @@ export class CoinPaymentService {
   }
 
   async getSupportedCurrencies(): Promise<string[]> {
-    try {
-      const rates = await this.getRates();
-      if (!rates) {
-        return [];
-      }
-      return Object.keys(rates).filter(
-        (currency) => rates[currency].status === 'online',
-      );
-    } catch (error) {
-      this.logger.error({ err: error }, 'Failed to get supported currencies');
-      return ['USD', 'BTC', 'ETH', 'LTC']
-    }
+    return ['USD', 'BTC', 'ETH', 'LTC'];
   }
 }
