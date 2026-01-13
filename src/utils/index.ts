@@ -3,5 +3,6 @@ export * from './env';
 export * from './helpers';
 export * from './logger';
 export * from './decorators';
+export * from './filters';
 export { MailService } from './mail/mail.service';
 export { UtilsModule } from './utils.module';

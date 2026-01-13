@@ -51,14 +51,14 @@ export class UsersService {
 
     const profileData: any = {};
 
-    if (dto.first_name) {
-      profileData.first_name = dto.first_name;
+    if (dto.firstName) {
+      profileData.first_name = dto.firstName;
     }
-    if (dto.last_name) {
-      profileData.last_name = dto.last_name;
+    if (dto.lastName) {
+      profileData.last_name = dto.lastName;
     }
 
-    const user = await this.prisma.user.update({
+    await this.prisma.user.update({
       where: { id: userId },
       data: {
         profile: {
@@ -67,7 +67,7 @@ export class UsersService {
       },
     });
 
-    return { message: 'Profile updated successfully', data: user };
+    return { message: 'Profile updated successfully', data: null };
   }
 
   async changePassword(userId: number, dto: ChangePasswordDto) {
@@ -135,7 +135,7 @@ export class UsersService {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        wallet_address: dto.wallet_address || null,
+        wallet_address: dto.walletAddress || null,
       },
     });
 

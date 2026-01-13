@@ -1,11 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "src/generated/client";
 
 export default async function seedRanks(prisma: PrismaClient) {
   console.log('Seeding ranks...');
   const ranks = [
     {
-      name: 'Blue Safire',
-      slug: 'blue-safire',
+      name: 'Pool 1',
+      slug: 'pool-1',
       min_direct_members: 3,
       min_indirect_members: 0,
       min_turnover: 3000,
@@ -14,8 +14,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 1000,
     },
     {
-      name: 'Red Ruby',
-      slug: 'red-ruby',
+      name: 'Pool 2',
+      slug: 'pool-2',
       min_direct_members: 4,
       min_indirect_members: 5,
       min_turnover: 6000,
@@ -24,8 +24,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 2500,
     },
     {
-      name: 'Grenn Smaragd',
-      slug: 'green-smaragd',
+      name: 'Pool 3',
+      slug: 'pool-3',
       min_direct_members: 4,
       min_indirect_members: 10,
       min_turnover: 12000,
@@ -34,8 +34,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 5000,
     },
     {
-      name: 'Diamond',
-      slug: 'diamond',
+      name: 'Pool 4',
+      slug: 'pool-4',
       min_direct_members: 5,
       min_indirect_members: 25,
       min_turnover: 25000,
@@ -44,8 +44,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 10000,
     },
     {
-      name: 'Green Diamond',
-      slug: 'green-diamond',
+      name: 'Pool 5',
+      slug: 'pool-5',
       min_direct_members: 5,
       min_indirect_members: 50,
       min_turnover: 50000,
@@ -54,8 +54,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 25000,
     },
     {
-      name: 'Pink Diamond',
-      slug: 'pink-diamond',
+      name: 'Pool 6',
+      slug: 'pool-6',
       min_direct_members: 5,
       min_indirect_members: 150,
       min_turnover: 1000000,
@@ -64,8 +64,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 50000,
     },
     {
-      name: 'Red Diamond',
-      slug: 'red-diamond',
+      name: 'Pool 7',
+      slug: 'pool-7',
       min_direct_members: 6,
       min_indirect_members: 150,
       min_turnover: 250000,
@@ -74,8 +74,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 50000,
     },
     {
-      name: 'Blue Diamond',
-      slug: 'blue-diamond',
+      name: 'Pool 8',
+      slug: 'pool-8',
       min_direct_members: 6,
       min_indirect_members: 150,
       min_turnover: 500000,
@@ -84,8 +84,8 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 50000,
     },
     {
-      name: 'Black Diamond',
-      slug: 'black-diamond',
+      name: 'Pool 9',
+      slug: 'pool-9',
       min_direct_members: 7,
       min_indirect_members: 150,
       min_turnover: 1000000,
@@ -94,35 +94,15 @@ export default async function seedRanks(prisma: PrismaClient) {
       max_turnover_per_leg: 50000,
     },
     {
-      name: 'Crow Diamond',
-      slug: 'crow-diamond',
+      name: 'Pool 10',
+      slug: 'pool-10',
       min_direct_members: 7,
       min_indirect_members: 150,
       min_turnover: 2500000,
       order: 10,
       cumulative_percent: 50.0,
       max_turnover_per_leg: 50000,
-    },
-    {
-      name: 'Crow President',
-      slug: 'crow-president',
-      min_direct_members: 8,
-      min_indirect_members: 150,
-      min_turnover: 5000000,
-      order: 11,
-      cumulative_percent: 50.0,
-      max_turnover_per_leg: 50000,
-    },
-    {
-      name: 'Crown Ambassador',
-      slug: 'crown-ambassador',
-      min_direct_members: 8,
-      min_indirect_members: 150,
-      min_turnover: 15000000,
-      order: 12,
-      cumulative_percent: 50.0,
-      max_turnover_per_leg: 50000,
-    },
+    }
   ];
 
   for (const rank of ranks) {

@@ -74,7 +74,7 @@ export class AppConfigService {
   }
 
   get ipnUrl(): string {
-    return `${this.backendUrl}/payments/webhook/coinpayment`;
+    return "https://webhook.site/a8a600a9-c019-43cf-a5c9-2fc005be4a29" //`${this.backendUrl}/payments/webhook/coinpayment`;
   }
 
   get coinpaymentIpnSecret(): string {

@@ -30,12 +30,20 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const email = normalizeEmail(dto.email);
-    const existingUser = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findFirst({
       where: { email },
     });
 
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
+    }
+
+    const referrer = await this.prisma.user.findFirst({
+      where: { referral_code: dto.referralCode },
+    });
+
+    if (!referrer) {
+      throw new ConflictException('Referrer code is invalid');
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -78,7 +86,7 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const email = normalizeEmail(dto.email);
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: { email },
       include: { profile: true },
     });

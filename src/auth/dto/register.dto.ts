@@ -4,7 +4,7 @@ import {
   IsString,
   MinLength,
   IsDateString,
-  IsOptional,
+  Matches,
 } from 'class-validator';
 
 export class RegisterDto {
@@ -27,9 +27,13 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
+    message:
+      'Password must be a strong password',
+  })
   password: string;
 
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   referralCode?: string;
 }

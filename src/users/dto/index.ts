@@ -1,12 +1,17 @@
-import { IsString, IsEmail, MinLength, IsOptional } from 'class-validator';
+import { IsString, IsEmail, MinLength, IsOptional, Matches, IsNotEmpty } from 'class-validator';
 
 export class ChangePasswordDto {
   @IsString()
-  @MinLength(6)
+  @IsNotEmpty()
   currentPassword: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
+  @IsNotEmpty()
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
+    message:
+      'Password must be a strong password',
+  })
   newPassword: string;
 }
 
@@ -22,15 +27,15 @@ export class CreateUserDto {
 export class UpdateProfileDto {
   @IsOptional()
   @IsString()
-  first_name?: string;
+  firstName?: string;
 
   @IsOptional()
   @IsString()
-  last_name?: string;
+  lastName?: string;
 }
 
 export class UpdateWalletDto {
   @IsString()
   @IsOptional()
-  wallet_address?: string;
+  walletAddress?: string;
 }

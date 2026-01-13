@@ -148,6 +148,7 @@ export class PaymentsService {
     try {
       const transaction = await this.coinPaymentService.createTransaction({
         amount,
+        buyer_email: user.email,
         currency1: "USD",
         currency2: dto.currency || 'USD', // Can be changed to accept crypto
         item_name: targetPackage.name,
@@ -175,7 +176,8 @@ export class PaymentsService {
       });
 
       return {
-        payment_id: updatedPayment.id
+        ...transaction,
+        payment_id: updatedPayment.id,
       };
     } catch (error) {
       // Update payment status to failed if CoinPayment fails

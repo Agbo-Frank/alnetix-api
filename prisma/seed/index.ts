@@ -1,14 +1,18 @@
-import { PrismaClient } from '@prisma/client';
 import 'dotenv/config';
-// import seedRanks from './ranks';
+import { PrismaClient } from 'src/generated/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import seedRanks from './ranks';
 import seedPackages from './packages';
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL as string,
+});
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   return await Promise.all([
     seedPackages(prisma),
-    // seedRanks(prisma),
+    seedRanks(prisma),
   ]);
 }
 

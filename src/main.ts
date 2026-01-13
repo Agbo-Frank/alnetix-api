@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { Logger } from 'nestjs-pino';
 import { AppConfigService } from './utils/env';
+import { ValidationExceptionFilter } from './utils';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -12,6 +13,8 @@ async function bootstrap() {
   });
 
   app.useLogger(app.get(Logger));
+
+  app.useGlobalFilters(new ValidationExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({
