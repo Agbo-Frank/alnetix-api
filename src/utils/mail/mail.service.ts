@@ -5,6 +5,7 @@ import * as handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
 import { AppConfigService } from '../env';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class MailService {
@@ -50,7 +51,7 @@ export class MailService {
     const template = handlebars.compile(templateSource);
     return template({
       ...context,
-      year: new Date().getFullYear(),
+      year: dayjs().year(),
     });
   }
 

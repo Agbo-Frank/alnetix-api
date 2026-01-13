@@ -9,6 +9,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import dayjs from 'dayjs';
 import { MailService } from '../utils/mail/mail.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -49,7 +50,7 @@ export class AuthService {
           create: {
             first_name: dto.firstName,
             last_name: dto.lastName,
-            date_of_birth: new Date(dto.dateOfBirth),
+            date_of_birth: dayjs(dto.dateOfBirth).toDate(),
           },
         },
       },
@@ -115,7 +116,7 @@ export class AuthService {
       where: { token, type: TokenType.VERIFICATION },
     });
 
-    if (!tokenRecord || tokenRecord.expires_at < new Date()) {
+    if (!tokenRecord || dayjs(tokenRecord.expires_at).isBefore(dayjs())) {
       throw new BadRequestException('Invalid or expired verification link');
     }
 
@@ -197,7 +198,7 @@ export class AuthService {
       where: { token: dto.token, type: TokenType.PASSWORD_RESET },
     });
 
-    if (!tokenRecord || tokenRecord.expires_at < new Date()) {
+    if (!tokenRecord || dayjs(tokenRecord.expires_at).isBefore(dayjs())) {
       throw new BadRequestException('Invalid or expired reset link');
     }
 
@@ -222,8 +223,7 @@ export class AuthService {
     expiresMin: number,
   ): Promise<string> {
     const token = crypto.randomBytes(32).toString('hex');
-    const expires_at = new Date();
-    expires_at.setMinutes(expires_at.getMinutes() + expiresMin);
+    const expires_at = dayjs().add(expiresMin, 'minute').toDate();
 
     await this.prisma.token.create({
       data: {

@@ -29,6 +29,7 @@ model User {
   // Relations
   profile UserProfile?
   tokens  Token[]
+  payments Payment[]
 
   rankId Int?
   rank   Rank? @relation(fields: [rankId], references: [id])
@@ -53,6 +54,29 @@ model UserProfile {
 enum TokenType {
   VERIFICATION
   PASSWORD_RESET
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  COINPAYMENT
+}
+
+enum PaymentItemType {
+  PACKAGE_PURCHASE
+  PACKAGE_UPGRADE
+}
+
+enum CommissionStatus {
+  NOT_ELIGIBLE
+  ELIGIBLE
+  COMPLETED
 }
 
 model Token {
@@ -93,4 +117,35 @@ model Package {
   users User[]
 
   @@map("packages")
+}
+
+model Payment {
+  id                Int             @id @default(autoincrement())
+  userId            Int
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount            Float
+  provider          PaymentProvider @default(COINPAYMENT)
+  status            PaymentStatus   @default(PENDING)
+  commission_status CommissionStatus @default(NOT_ELIGIBLE)
+  provider_reference String?         @unique
+  expires_at        DateTime?
+  completed_at      DateTime?
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @updatedAt
+
+  items             PaymentItem[]
+
+  @@map("payments")
+}
+
+model PaymentItem {
+  id          Int             @id @default(autoincrement())
+  paymentId   Int
+  payment     Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  type        PaymentItemType
+  name        String
+  amount      Float
+  referenceId Int?
+
+  @@map("payment_items")
 }

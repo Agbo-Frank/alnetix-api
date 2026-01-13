@@ -16,6 +16,7 @@ Table users {
   membership_due_date DateTime
   profile user_profiles
   tokens tokens [not null]
+  payments payments [not null]
   rankId Int
   rank ranks
   packageId Int
@@ -61,9 +62,58 @@ Table packages {
   users users [not null]
 }
 
+Table payments {
+  id Int [pk, increment]
+  userId Int [not null]
+  user users [not null]
+  amount Float [not null]
+  provider PaymentProvider [not null, default: 'COINPAYMENT']
+  status PaymentStatus [not null, default: 'PENDING']
+  commission_status CommissionStatus [not null, default: 'NOT_ELIGIBLE']
+  provider_reference String [unique]
+  expires_at DateTime
+  completed_at DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  items payment_items [not null]
+}
+
+Table payment_items {
+  id Int [pk, increment]
+  paymentId Int [not null]
+  payment payments [not null]
+  type PaymentItemType [not null]
+  name String [not null]
+  amount Float [not null]
+  referenceId Int
+}
+
 Enum TokenType {
   VERIFICATION
   PASSWORD_RESET
+}
+
+Enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+Enum PaymentProvider {
+  COINPAYMENT
+}
+
+Enum PaymentItemType {
+  PACKAGE_PURCHASE
+  PACKAGE_UPGRADE
+}
+
+Enum CommissionStatus {
+  NOT_ELIGIBLE
+  ELIGIBLE
+  COMPLETED
 }
 
 Ref: users.rankId > ranks.id
@@ -73,3 +123,7 @@ Ref: users.packageId > packages.id
 Ref: user_profiles.userId - users.id [delete: Cascade]
 
 Ref: tokens.userId > users.id [delete: Cascade]
+
+Ref: payments.userId > users.id [delete: Cascade]
+
+Ref: payment_items.paymentId > payments.id [delete: Cascade]
