@@ -3,7 +3,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../prisma/prisma.service';
 import { COMMISSION_CONSTANTS } from './commissions.constants';
 import { CommissionType } from 'src/generated/enums';
-import { Prisma, PrismaClient } from 'src/generated/client';
+import { Prisma, PrismaClient, User } from 'src/generated/client';
 import { AffiliateBonus, GetCommissionsDto, UnstoppableBonus } from './dto';
 import { paginate, PaginationParams } from 'src/utils';
 
@@ -58,15 +58,14 @@ export class CommissionsService {
             select: {
               id: true,
               email: true,
+              profile: {
+                select: {
+                  first_name: true,
+                  last_name: true,
+                },
+              },
             },
-          },
-          payment: {
-            select: {
-              id: true,
-              amount: true,
-              status: true,
-            },
-          },
+          }
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -161,11 +160,21 @@ export class CommissionsService {
         throw new NotFoundException(`Payment with ID ${paymentId} not found`);
       }
 
+      const customer = await this.prisma.user.findUnique({
+        where: { id: customerId },
+      });
+      if (!customer) {
+        throw new NotFoundException(`Customer with ID ${customerId} not found`);
+      }
+
       // Use transaction to ensure atomicity
       await this.prisma.$transaction(async (tx) => {
+        // Update team_turnover for all parents/ancestors
+        await this.updateTeamTurnover(customer, amount, tx);
+
         // Distribute affiliate commissions
         await this.distributeAffiliateCommissions(
-          customerId,
+          customer,
           paymentId,
           amount,
           tx,
@@ -173,7 +182,7 @@ export class CommissionsService {
 
         // Distribute unstoppable commissions
         await this.distributeUnstoppableCommissions(
-          customerId,
+          customer,
           paymentId,
           amount,
           tx,
@@ -193,28 +202,29 @@ export class CommissionsService {
   }
 
   private async distributeAffiliateCommissions(
-    customerId: number,
+    customer: User,
     paymentId: number,
     amount: number,
     tx: PrismaTransaction,
   ): Promise<void> {
-    const { affiliateBonuses, processedUserIds } = await this.calculateAffiliateBonuses(
-      customerId,
+    const affiliateBonuses = await this.calculateAffiliateBonuses(
+      customer,
       amount,
       tx,
     );
 
     for (const affiliateBonus of affiliateBonuses) {
-      if (affiliateBonus.commission !== null) {
+      if (affiliateBonus.commission) {
         await tx.commission.create({
           data: {
             type: CommissionType.affiliate,
             userId: affiliateBonus.userId,
-            customerId,
+            customerId: customer.id,
             paymentId,
+            amount,
             position: String(affiliateBonus.level),
             commission: affiliateBonus.commission,
-            percentage: affiliateBonus.default_bonus,
+            percentage: affiliateBonus.bonus,
           },
         });
 
@@ -226,27 +236,15 @@ export class CommissionsService {
         );
       }
     }
-
-    // Update team_turnover for all parents (regardless of qualification)
-    await tx.user.updateMany({
-      where: {
-        id: { in: processedUserIds },
-      },
-      data: {
-        team_turnover: {
-          increment: amount,
-        },
-      },
-    });
   }
 
   private async distributeUnstoppableCommissions(
-    customerId: number,
+    customer: User,
     paymentId: number,
     amount: number,
     tx: PrismaTransaction,
   ): Promise<void> {
-    const unstoppableBonuses = await this.calculateUnstoppableBonuses(customerId, amount, tx);
+    const unstoppableBonuses = await this.calculateUnstoppableBonuses(customer, amount, tx);
 
     // Create commission records and update balances
     for (const unstoppableBonus of unstoppableBonuses) {
@@ -255,8 +253,9 @@ export class CommissionsService {
           data: {
             type: CommissionType.unstoppable,
             userId: unstoppableBonus.userId,
-            customerId,
+            customerId: customer.id,
             paymentId,
+            amount,
             position: unstoppableBonus.rank || '',
             commission: unstoppableBonus.commission,
             percentage: unstoppableBonus.bonus || 0,
@@ -294,24 +293,63 @@ export class CommissionsService {
     });
   }
 
+  /**
+   * Update team_turnover for all parents/ancestors of the customer who made payment
+   * This excludes the customer themselves and only updates their parents up the referral tree
+   */
+  private async updateTeamTurnover(
+    customer: User,
+    amount: number,
+    tx: PrismaTransaction,
+  ): Promise<void> {
+    let currentUser = customer;
+
+    const processedUserIds = new Set<number>([customer.id]);
+
+    // Traverse up the referral tree
+    while (currentUser?.referred_by_code) {
+      const parent = await tx.user.findFirst({
+        where: { referral_code: currentUser.referred_by_code }
+      });
+
+      if (!parent) {
+        break; // Parent not found, stop traversal
+      }
+
+      // Prevent circular references
+      if (processedUserIds.has(parent.id)) {
+        break;
+      }
+
+      processedUserIds.add(parent.id);
+
+      // Increment team_turnover for this parent (excluding customer's personal turnover)
+      await tx.user.update({
+        where: { id: parent.id },
+        data: {
+          team_turnover: {
+            increment: amount,
+          },
+        },
+      });
+
+      // Move to next parent
+      currentUser = parent;
+    }
+  }
+
   private async calculateAffiliateBonuses(
-    customerId: number,
+    customer: User,
     amount: number,
     tx: PrismaTransaction,
   ) {
     const affiliateBonuses: AffiliateBonus[] = [];
 
-    const processedUserIds = new Set<number>([customerId]);
-    let currentUser = await tx.user.findUnique({
-      where: { id: customerId },
-    });
-
-    if (!currentUser) {
-      throw new NotFoundException(`Customer with ID ${customerId} not found`);
-    }
+    let currentUser = customer;
 
     let level = 1;
     let count = 1;
+    const processedUserIds = new Set<number>([customer.id]);
 
     while (level <= COMMISSION_CONSTANTS.AFFILIATE_LEVEL_DEPTH) {
       if (!currentUser) {
@@ -339,71 +377,34 @@ export class CommissionsService {
 
       processedUserIds.add(parent.id);
 
-      // Check if parent is active
-      const is_actived = parent.is_active;
-
-      // Check qualification: must have at least (level - 1) direct children
-      const directChildrenCount = await tx.user.count({
-        where: {
-          referred_by_code: parent.referral_code,
-        },
-      });
-
-      const is_qualified = directChildrenCount >= level - 1;
-
-      // Commission is only available if both active and qualified
-      const isAvailableBonus = is_actived && is_qualified;
-
       // Calculate commission
-      const default_bonus =
-        level === 1
-          ? COMMISSION_CONSTANTS.direct
-          : COMMISSION_CONSTANTS.indirect;
-
-      const bonus = isAvailableBonus ? default_bonus : null;
-      const commission = isAvailableBonus
-        ? amount *
+      const bonus = COMMISSION_CONSTANTS.levels[Math.min(level, COMMISSION_CONSTANTS.AFFILIATE_LEVEL_DEPTH)];
+      const commission = amount *
         (COMMISSION_CONSTANTS.referral / 100) *
-        (default_bonus / 100)
-        : null;
+        (bonus / 100)
 
       // Add to bonuses array
       affiliateBonuses.push({
         userId: parent.id,
         level,
-        is_qualified,
-        is_actived,
-        default_bonus,
         bonus,
         commission,
       });
-      if (is_actived && is_qualified) {
-        level++;
-      }
 
+      level++;
       count++;
       currentUser = parent;
     }
 
-    return {
-      affiliateBonuses,
-      processedUserIds: Array.from(processedUserIds),
-    };
+    return affiliateBonuses
   }
 
   private async calculateUnstoppableBonuses(
-    customerId: number,
+    customer: User,
     amount: number,
     tx: PrismaTransaction,
   ) {
     const unstoppableBonuses: UnstoppableBonus[] = [];
-
-    const customer = await tx.user.findUnique({
-      where: { id: customerId },
-    });
-    if (!customer) {
-      throw new NotFoundException(`Customer with ID ${customerId} not found`);
-    }
 
     if (!customer.referred_by_code) {
       return unstoppableBonuses;
@@ -472,4 +473,6 @@ export class CommissionsService {
 
     return unstoppableBonuses;
   }
+
+
 }

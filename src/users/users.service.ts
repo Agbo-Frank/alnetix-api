@@ -173,7 +173,7 @@ export class UsersService {
       select: {
         id: true,
         email: true,
-        level: true,
+        turnover: true,
         team_turnover: true,
         profile: {
           select: {

@@ -202,7 +202,60 @@
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Get User details",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/users/me",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"users",
+										"me"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "631"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"277-ArVlrdVHpNAlzLHOBuvXbXX1R0I\""
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 14 Jan 2026 06:49:38 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"User fetched successfully\",\n    \"data\": {\n        \"id\": 2,\n        \"email\": \"alnetix@yopmail.com\",\n        \"referral_code\": \"BG-20000101-1\",\n        \"referred_by_code\": \"RAND001\",\n        \"is_verified\": true,\n        \"is_disabled\": false,\n        \"level\": null,\n        \"team_turnover\": 1091,\n        \"point\": 0,\n        \"membership_due_date\": null,\n        \"commission_earned\": 79.52,\n        \"commission_balance\": 79.52,\n        \"is_active\": true,\n        \"wallet_address\": null,\n        \"rankId\": null,\n        \"packageId\": 1,\n        \"profile\": {\n            \"id\": 2,\n            \"first_name\": \"Wallace\",\n            \"last_name\": \"Harvey\",\n            \"date_of_birth\": \"1999-12-31T23:00:00.000Z\",\n            \"image\": null,\n            \"userId\": 2\n        },\n        \"rank\": null,\n        \"package\": {\n            \"id\": 1,\n            \"slug\": \"access-key\",\n            \"name\": \"THE ACCESS KEY\",\n            \"description\": \"Backoffice Access Only\",\n            \"price\": 97\n        }\n    }\n}"
+						}
+					]
 				},
 				{
 					"name": "Update Profile",
@@ -236,6 +289,15 @@
 					"request": {
 						"method": "GET",
 						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get user's members",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"description": "This can be used to form a tree by passing the referral code of the user's members, to get the root members don't include the referral code"
 					},
 					"response": []
 				}
@@ -304,7 +366,60 @@
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Get checkout details",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/payments/checkout",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"payments",
+										"checkout"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "547"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"223-oXaAW3CgjV9MVekDHWEj9ytUrj4\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 13 Jan 2026 19:30:03 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Checkout details fetched successfully\",\n    \"data\": {\n        \"supportedCurrencies\": [\n            \"USD\",\n            \"BTC\",\n            \"ETH\",\n            \"LTC\"\n        ],\n        \"availablePackages\": [\n            {\n                \"id\": 1,\n                \"slug\": \"access-key\",\n                \"name\": \"THE ACCESS KEY\",\n                \"description\": \"Backoffice Access Only\",\n                \"price\": 97\n            },\n            {\n                \"id\": 2,\n                \"slug\": \"knowledge-package\",\n                \"name\": \"KNOWLEDGE PACKAGE\",\n                \"description\": \"Unlock Atlas\",\n                \"price\": 497\n            },\n            {\n                \"id\": 3,\n                \"slug\": \"transformation-package\",\n                \"name\": \"TRANSFORMATION PACKAGE\",\n                \"description\": \"Unlock Psyche\",\n                \"price\": 1997\n            },\n            {\n                \"id\": 4,\n                \"slug\": \"the-key\",\n                \"name\": \"THE KEY\",\n                \"description\": \"Unlock Atlas & Psyche\",\n                \"price\": 4997\n            }\n        ]\n    }\n}"
+						}
+					]
 				},
 				{
 					"name": "Create/make payment",
@@ -331,7 +446,68 @@
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Create/make payment",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"packageId\": 2,\n    \"currency\": \"BTC\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/payments",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"payments"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "550"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"226-XqOn0cd6+UAzDLVmMeXAfIHO8Vs\""
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 14 Jan 2026 06:46:13 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"amount\": \"0.00525000\",\n    \"txn_id\": \"CPKA2EDIOATB0VFW3NOUKXVMOC\",\n    \"address\": \"3Dymp5oCM5jcfrdgCqta81Tc7oLQFkTU31\",\n    \"confirms_needed\": \"2\",\n    \"timeout\": 10800,\n    \"checkout_url\": \"https://www.coinpayments.net/index.php?cmd=checkout&id=CPKA2EDIOATB0VFW3NOUKXVMOC&key=06d93d57094d5e468bbb3e287a206446\",\n    \"status_url\": \"https://www.coinpayments.net/index.php?cmd=status&id=CPKA2EDIOATB0VFW3NOUKXVMOC&key=06d93d57094d5e468bbb3e287a206446\",\n    \"qrcode_url\": \"https://www.coinpayments.net/qrgen.php?id=CPKA2EDIOATB0VFW3NOUKXVMOC&key=06d93d57094d5e468bbb3e287a206446\",\n    \"payment_id\": 8\n}"
+						}
+					]
 				},
 				{
 					"name": "Get user payments",
@@ -343,6 +519,104 @@
 				},
 				{
 					"name": "Get payment details",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Simulate payment completion",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/payments/:id/simulate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"payments",
+								":id",
+								"simulate"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Simulate payment completion",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/payments/:id/simulate",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"payments",
+										":id",
+										"simulate"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "8"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "54"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"36-FrJUo4BmCe77qc95rw/SjEWjGcg\""
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 14 Jan 2026 06:48:34 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Payment is already completed\",\n    \"data\": null\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Commissions",
+			"item": [
+				{
+					"name": "Get user commissions",
 					"request": {
 						"method": "GET",
 						"header": []
@@ -383,8 +657,7 @@
 		},
 		{
 			"key": "token",
-			"value": "",
-			"type": "default"
+			"value": ""
 		}
 	]
 }

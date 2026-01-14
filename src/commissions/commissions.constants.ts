@@ -9,14 +9,8 @@ export const COMMISSION_CONSTANTS = {
 
   // Maximum depth for affiliate commission distribution
   AFFILIATE_LEVEL_DEPTH: 2,
-  levels: [
-    {
-      level: 1,
-      percentage: 8,
-    },
-    {
-      level: 2,
-      percentage: 2,
-    },
-  ]
+  levels: {
+    "1": 15,
+    "2": 5,
+  }
 } as const;

@@ -31,13 +31,14 @@ export class GetCommissionsDto {
 export interface AffiliateBonus {
   userId: number;
   level: number;
+  bonus: number;
+  commission: number | null;
+}
+
+export interface UnstoppableBonus extends Omit<AffiliateBonus, 'level' | 'bonus'> {
+  rank: string | null;
   is_qualified: boolean;
   is_actived: boolean;
   default_bonus: number;
   bonus: number | null;
-  commission: number | null;
-}
-
-export interface UnstoppableBonus extends Omit<AffiliateBonus, 'level'> {
-  rank: string | null;
 }

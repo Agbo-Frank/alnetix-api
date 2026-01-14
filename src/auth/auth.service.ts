@@ -53,12 +53,16 @@ export class AuthService {
       dto.dateOfBirth,
     );
 
+    const streamlineCount = await this.prisma.user.count();
+    const streamline = streamlineCount + 1;
+
     const user = await this.prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         referral_code: referralCode,
         referred_by_code: dto.referralCode,
+        streamline,
         profile: {
           create: {
             first_name: dto.firstName,

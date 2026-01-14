@@ -229,7 +229,7 @@ export class PaymentsService {
       },
     });
 
-    if (!payment) {
+    if (!payment || payment.status !== PaymentStatus.PENDING) {
       return;
     }
 
@@ -289,10 +289,14 @@ export class PaymentsService {
 
       const packageId = packageItem.referenceId;
 
-      // Update user's package
       await this.prisma.user.update({
         where: { id: payment.userId },
-        data: { packageId },
+        data: {
+          packageId,
+          turnover: {
+            increment: payment.amount,
+          },
+        },
       });
 
       await this.prisma.payment.update({
@@ -381,6 +385,14 @@ export class PaymentsService {
     if (!payment) {
       throw new NotFoundException('Payment not found');
     }
+    if (payment.status !== PaymentStatus.PENDING) {
+      const message = {
+        [PaymentStatus.COMPLETED]: 'Payment is already completed',
+        [PaymentStatus.CANCELLED]: 'Payment is cancelled',
+        [PaymentStatus.FAILED]: 'Payment is failed',
+      };
+      throw new BadRequestException(message[payment.status] || 'Payment is not pending');
+    }
 
     const updatedPayment = await this.prisma.payment.update({
       where: { id: payment.id },
@@ -403,6 +415,6 @@ export class PaymentsService {
       'Payment completion simulated',
     );
 
-    return { message: 'Payment completion simulated successfully', data: null };
+    return { message: 'Payment completed successfully', data: null };
   }
 }

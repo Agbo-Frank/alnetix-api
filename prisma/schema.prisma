@@ -21,7 +21,8 @@ model User {
   referred_by_code    String?
   is_verified         Boolean   @default(false)
   is_disabled         Boolean   @default(false)
-  level               String?   @db.Char(1) @default("1")
+  streamline          Int?      @unique
+  turnover            Float     @default(0)
   team_turnover       Float     @default(0)
   point               Float     @default(0)
   membership_due_date DateTime?
@@ -172,6 +173,7 @@ model Commission {
   customer      User           @relation("CustomerCommissions", fields: [customerId], references: [id])
   paymentId    Int
   payment       Payment        @relation(fields: [paymentId], references: [id])
+  amount        Float
   position      String
   commission    Float
   percentage    Float
