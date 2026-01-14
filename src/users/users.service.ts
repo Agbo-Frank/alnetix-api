@@ -141,4 +141,52 @@ export class UsersService {
 
     return { message: 'Wallet address updated successfully', data: null };
   }
+
+  async getMembers(userId: number, referralCode: string) {
+    let target: string;
+
+    if (referralCode) {
+      const targetUser = await this.prisma.user.findFirst({
+        where: { referral_code: referralCode },
+        select: { id: true, referral_code: true },
+      });
+
+      if (!targetUser) {
+        throw new NotFoundException('Member not found');
+      }
+
+      target = targetUser.referral_code!;
+    } else {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { referral_code: true },
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      target = user.referral_code;
+    }
+
+    const members = await this.prisma.user.findMany({
+      where: { referred_by_code: target },
+      select: {
+        id: true,
+        email: true,
+        turnover: true,
+        team_turnover: true,
+        profile: {
+          select: {
+            first_name: true,
+            last_name: true,
+          },
+        },
+      },
+    });
+
+    return {
+      message: 'Members fetched successfully',
+      data: members
+    };
+  }
 }

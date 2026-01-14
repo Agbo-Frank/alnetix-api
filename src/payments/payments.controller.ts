@@ -49,6 +49,15 @@ export class PaymentsController {
     return this.paymentsService.getUserPayments(user.id, pagination);
   }
 
+  @Post(':id/simulate')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async simulatePaymentCompletion(
+    @Param('id', ParseIntPipe) paymentId: number,
+  ) {
+    return this.paymentsService.simulatePaymentCompletion(paymentId);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   async getPayment(

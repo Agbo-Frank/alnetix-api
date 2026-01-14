@@ -31,7 +31,7 @@ export const Pagination = createParamDecorator((
   const query = request.query;
 
   const defaultPage = data.defaultPage ?? 1;
-  const defaultLimit = data.defaultLimit ?? 20;
+  const defaultLimit = data.defaultLimit ?? 25;
   const maxLimit = data.maxLimit ?? 100;
 
   // Extract and parse page

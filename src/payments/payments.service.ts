@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../prisma/prisma.service';
@@ -228,7 +229,7 @@ export class PaymentsService {
       },
     });
 
-    if (!payment) {
+    if (!payment || payment.status !== PaymentStatus.PENDING) {
       return;
     }
 
@@ -288,10 +289,14 @@ export class PaymentsService {
 
       const packageId = packageItem.referenceId;
 
-      // Update user's package
       await this.prisma.user.update({
         where: { id: payment.userId },
-        data: { packageId },
+        data: {
+          packageId,
+          turnover: {
+            increment: payment.amount,
+          },
+        },
       });
 
       await this.prisma.payment.update({
@@ -357,5 +362,59 @@ export class PaymentsService {
     }
 
     return payment;
+  }
+
+  /**
+   * Simulate payment completion (dev environment only)
+   */
+  async simulatePaymentCompletion(paymentId: number) {
+    if (this.env.isProduction) {
+      throw new ForbiddenException();
+    }
+
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: {
+        items: true,
+        user: {
+          include: { package: true },
+        },
+      },
+    });
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found');
+    }
+    if (payment.status !== PaymentStatus.PENDING) {
+      const message = {
+        [PaymentStatus.COMPLETED]: 'Payment is already completed',
+        [PaymentStatus.CANCELLED]: 'Payment is cancelled',
+        [PaymentStatus.FAILED]: 'Payment is failed',
+      };
+      throw new BadRequestException(message[payment.status] || 'Payment is not pending');
+    }
+
+    const updatedPayment = await this.prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: PaymentStatus.COMPLETED,
+        completed_at: dayjs().toDate(),
+      },
+      include: {
+        items: true,
+        user: {
+          include: { package: true },
+        },
+      },
+    });
+
+    await this.completePayment(updatedPayment);
+
+    this.logger.info(
+      { paymentId: updatedPayment.id },
+      'Payment completion simulated',
+    );
+
+    return { message: 'Payment completed successfully', data: null };
   }
 }

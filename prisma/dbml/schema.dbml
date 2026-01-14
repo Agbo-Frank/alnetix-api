@@ -6,11 +6,12 @@ Table users {
   id Int [pk, increment]
   email String [unique, not null]
   password String [not null]
-  referral_code String
+  referral_code String [not null]
   referred_by_code String
   is_verified Boolean [not null, default: false]
   is_disabled Boolean [not null, default: false]
-  level String
+  streamline Int [unique]
+  turnover Float [not null, default: 0]
   team_turnover Float [not null, default: 0]
   point Float [not null, default: 0]
   membership_due_date DateTime
@@ -105,6 +106,7 @@ Table commissions {
   customer users [not null]
   paymentId Int [not null]
   payment payments [not null]
+  amount Float [not null]
   position String [not null]
   commission Float [not null]
   percentage Float [not null]

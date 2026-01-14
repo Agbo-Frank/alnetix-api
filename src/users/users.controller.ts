@@ -13,6 +13,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
@@ -77,5 +78,13 @@ export class UsersController {
     @Body() dto: UpdateWalletDto,
   ) {
     return this.usersService.updateWalletAddress(user.id, dto);
+  }
+
+  @Get('members')
+  async getMembers(
+    @CurrentUser() user: User,
+    @Query('referralCode') referralCode: string,
+  ) {
+    return this.usersService.getMembers(user.id, referralCode);
   }
 }
