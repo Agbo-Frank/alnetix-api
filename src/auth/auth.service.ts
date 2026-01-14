@@ -11,9 +11,11 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import dayjs from 'dayjs';
 import { MailService } from '../utils/mail/mail.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import {
+  ResetPasswordDto,
+  LoginDto,
+  RegisterDto,
+} from './dto';
 import { TokenType } from 'src/generated/client';
 import { normalizeEmail } from '../utils/helpers';
 

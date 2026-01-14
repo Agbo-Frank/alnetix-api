@@ -624,6 +624,19 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "MISC",
+			"item": [
+				{
+					"name": "Validate Referral code",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [

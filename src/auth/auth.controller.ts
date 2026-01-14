@@ -4,19 +4,22 @@ import {
   Body,
   Get,
   Query,
+  Param,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ResendVerificationDto } from './dto/resend-verification.dto';
+import {
+  RegisterDto,
+  LoginDto,
+  ResetPasswordDto,
+  ForgotPasswordDto,
+  ResendVerificationDto
+} from './dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Post('register')
   register(@Body() dto: RegisterDto) {

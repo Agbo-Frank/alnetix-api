@@ -38,8 +38,8 @@ model User {
   earnedCommissions Commission[] @relation("EarnedCommissions")
   customerCommissions Commission[] @relation("CustomerCommissions")
 
-  rankId String?
-  rank   Rank? @relation(fields: [rankId], references: [id])
+  poolId Int?
+  pool   Pool? @relation(fields: [poolId], references: [id])
 
   packageId Int?
   package   Package? @relation(fields: [packageId], references: [id])
@@ -103,20 +103,19 @@ model Token {
   @@map("tokens")
 }
 
-model Rank {
-  id                   String @id
+model Pool {
+  id                   Int    @id @default(autoincrement())
   name                 String
   min_direct_members   Int
-  min_indirect_members Int
   min_turnover         Int
-  order                Int
+  min_team_turnover    Int
   cumulative_percent   Float
   max_turnover_per_leg Int
 
   // Back relation
   users User[]
 
-  @@map("ranks")
+  @@map("pools")
 }
 
 model Package {

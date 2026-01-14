@@ -21,11 +21,12 @@ CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "referral_code" TEXT,
+    "referral_code" TEXT NOT NULL,
     "referred_by_code" TEXT,
     "is_verified" BOOLEAN NOT NULL DEFAULT false,
     "is_disabled" BOOLEAN NOT NULL DEFAULT false,
-    "level" CHAR(1),
+    "streamline" INTEGER,
+    "turnover" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "team_turnover" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "point" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "membership_due_date" TIMESTAMP(3),
@@ -33,7 +34,7 @@ CREATE TABLE "users" (
     "commission_balance" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "wallet_address" TEXT,
-    "rankId" INTEGER,
+    "poolId" INTEGER,
     "packageId" INTEGER,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
@@ -63,18 +64,16 @@ CREATE TABLE "tokens" (
 );
 
 -- CreateTable
-CREATE TABLE "ranks" (
+CREATE TABLE "pools" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
     "min_direct_members" INTEGER NOT NULL,
-    "min_indirect_members" INTEGER NOT NULL,
     "min_turnover" INTEGER NOT NULL,
-    "order" INTEGER NOT NULL,
+    "min_team_turnover" INTEGER NOT NULL,
     "cumulative_percent" DOUBLE PRECISION NOT NULL,
     "max_turnover_per_leg" INTEGER NOT NULL,
 
-    CONSTRAINT "ranks_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "pools_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -124,6 +123,7 @@ CREATE TABLE "commissions" (
     "userId" INTEGER NOT NULL,
     "customerId" INTEGER NOT NULL,
     "paymentId" INTEGER NOT NULL,
+    "amount" DOUBLE PRECISION NOT NULL,
     "position" TEXT NOT NULL,
     "commission" DOUBLE PRECISION NOT NULL,
     "percentage" DOUBLE PRECISION NOT NULL,
@@ -137,13 +137,13 @@ CREATE TABLE "commissions" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "users_streamline_key" ON "users"("streamline");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "user_profiles_userId_key" ON "user_profiles"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tokens_token_key" ON "tokens"("token");
-
--- CreateIndex
-CREATE UNIQUE INDEX "ranks_slug_key" ON "ranks"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "packages_slug_key" ON "packages"("slug");
@@ -167,7 +167,7 @@ CREATE INDEX "commissions_paymentId_idx" ON "commissions"("paymentId");
 CREATE INDEX "commissions_createdAt_idx" ON "commissions"("createdAt");
 
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_rankId_fkey" FOREIGN KEY ("rankId") REFERENCES "ranks"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "users" ADD CONSTRAINT "users_poolId_fkey" FOREIGN KEY ("poolId") REFERENCES "pools"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_packageId_fkey" FOREIGN KEY ("packageId") REFERENCES "packages"("id") ON DELETE SET NULL ON UPDATE CASCADE;

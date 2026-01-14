@@ -28,7 +28,7 @@ export class UsersService {
       where: { id },
       include: {
         profile: true,
-        rank: true,
+        pool: true,
         package: true,
       },
       omit: {

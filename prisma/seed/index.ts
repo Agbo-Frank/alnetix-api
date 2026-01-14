@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { PrismaClient } from 'src/generated/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import seedRanks from './ranks';
+import seedPools from './pools';
 import seedPackages from './packages';
 
 const adapter = new PrismaPg({
@@ -12,7 +12,7 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   return await Promise.all([
     seedPackages(prisma),
-    seedRanks(prisma),
+    seedPools(prisma),
   ]);
 }
 
