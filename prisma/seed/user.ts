@@ -20,26 +20,21 @@ export default async function seedUsers(prisma: PrismaClient) {
   }
 
   const normalizedEmail = normalizeEmail(rootUserEmail);
-
-  // Check if root user already exists
   const existingUser = await prisma.user.findUnique({
     where: { email: normalizedEmail },
   });
 
   if (existingUser) {
-    console.log(`✓ Root user already exists: ${normalizedEmail}`);
     return;
   }
 
   // Hash password
   const hashedPassword = await bcrypt.hash(rootUserPassword, 10);
 
-  // Generate referral code for root user (special format: ROOT-YYYYMMDD-1)
   const dobDate = dayjs(rootUserDateOfBirth);
   const datePart = dobDate.format('YYYYMMDD');
   const referralCode = `RU-${datePart}-1`;
 
-  // Get streamline number (should be 1 for root user)
   const streamlineCount = await prisma.user.count();
   const streamline = streamlineCount + 1;
 
