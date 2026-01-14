@@ -58,6 +58,10 @@ class EnvironmentVariables {
   })
   BACKEND_URL: string;
 
+  @IsString()
+  @IsOptional()
+  WHITELISTED_ORIGINS?: string;
+
   @IsEmail()
   MAIL_FROM_ADDRESS: string;
 

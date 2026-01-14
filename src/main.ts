@@ -25,6 +25,13 @@ async function bootstrap() {
   );
 
   const env = app.get(AppConfigService);
+
+  app.enableCors({
+    origin: env.whitelistedOrigins,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
+
   await app.listen(env.port);
 }
 bootstrap();

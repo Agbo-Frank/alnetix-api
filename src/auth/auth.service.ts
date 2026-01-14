@@ -1,6 +1,7 @@
 import {
   Injectable,
   UnauthorizedException,
+  ForbiddenException,
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
@@ -11,11 +12,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import dayjs from 'dayjs';
 import { MailService } from '../utils/mail/mail.service';
-import {
-  ResetPasswordDto,
-  LoginDto,
-  RegisterDto,
-} from './dto';
+import { ResetPasswordDto, LoginDto, RegisterDto } from './dto';
 import { TokenType } from 'src/generated/client';
 import { normalizeEmail } from '../utils/helpers';
 
@@ -109,7 +106,7 @@ export class AuthService {
     }
 
     if (!user.is_verified) {
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         'Please verify your email address to log in',
       );
     }
@@ -131,7 +128,7 @@ export class AuthService {
           firstName: user.profile?.first_name,
           lastName: user.profile?.last_name,
         },
-      }
+      },
     };
   }
 
@@ -151,7 +148,10 @@ export class AuthService {
 
     await this.prisma.token.delete({ where: { id: tokenRecord.id } });
 
-    return { message: 'Email verified successfully. You can now log in.', data: null };
+    return {
+      message: 'Email verified successfully. You can now log in.',
+      data: null,
+    };
   }
 
   async resendVerification(email: string) {
@@ -262,7 +262,7 @@ export class AuthService {
         referral_code: {
           startsWith: prefix,
         },
-      }
+      },
     });
 
     return `${prefix}-${count + 1}`;
