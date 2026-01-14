@@ -385,7 +385,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": null,
+							"_postman_previewlanguage": "",
 							"header": [
 								{
 									"key": "X-Powered-By",
@@ -397,15 +397,15 @@
 								},
 								{
 									"key": "Content-Length",
-									"value": "547"
+									"value": "629"
 								},
 								{
 									"key": "ETag",
-									"value": "W/\"223-oXaAW3CgjV9MVekDHWEj9ytUrj4\""
+									"value": "W/\"275-NhFh9aXGgdvTQz/Ljbzn3ui4Gm0\""
 								},
 								{
 									"key": "Date",
-									"value": "Tue, 13 Jan 2026 19:30:03 GMT"
+									"value": "Wed, 14 Jan 2026 19:39:37 GMT"
 								},
 								{
 									"key": "Connection",
@@ -417,7 +417,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"message\": \"Checkout details fetched successfully\",\n    \"data\": {\n        \"supportedCurrencies\": [\n            \"USD\",\n            \"BTC\",\n            \"ETH\",\n            \"LTC\"\n        ],\n        \"availablePackages\": [\n            {\n                \"id\": 1,\n                \"slug\": \"access-key\",\n                \"name\": \"THE ACCESS KEY\",\n                \"description\": \"Backoffice Access Only\",\n                \"price\": 97\n            },\n            {\n                \"id\": 2,\n                \"slug\": \"knowledge-package\",\n                \"name\": \"KNOWLEDGE PACKAGE\",\n                \"description\": \"Unlock Atlas\",\n                \"price\": 497\n            },\n            {\n                \"id\": 3,\n                \"slug\": \"transformation-package\",\n                \"name\": \"TRANSFORMATION PACKAGE\",\n                \"description\": \"Unlock Psyche\",\n                \"price\": 1997\n            },\n            {\n                \"id\": 4,\n                \"slug\": \"the-key\",\n                \"name\": \"THE KEY\",\n                \"description\": \"Unlock Atlas & Psyche\",\n                \"price\": 4997\n            }\n        ]\n    }\n}"
+							"body": "{\n    \"message\": \"Checkout details fetched successfully\",\n    \"data\": {\n        \"supportedCurrencies\": [\n            \"USD\",\n            \"BTC\",\n            \"ETH\",\n            \"LTC\"\n        ],\n        \"availablePackages\": [\n            {\n                \"id\": 1,\n                \"slug\": \"access-key\",\n                \"name\": \"THE ACCESS KEY\",\n                \"description\": \"Backoffice Access Only\",\n                \"price\": 97\n            },\n            {\n                \"id\": 2,\n                \"slug\": \"knowledge-package\",\n                \"name\": \"KNOWLEDGE PACKAGE\",\n                \"description\": \"Unlock Atlas\",\n                \"price\": 497\n            },\n            {\n                \"id\": 3,\n                \"slug\": \"transformation-package\",\n                \"name\": \"TRANSFORMATION PACKAGE\",\n                \"description\": \"Unlock Psyche\",\n                \"price\": 1997\n            },\n            {\n                \"id\": 4,\n                \"slug\": \"the-key\",\n                \"name\": \"THE KEY\",\n                \"description\": \"Unlock Atlas & Psyche\",\n                \"price\": 4997\n            }\n        ],\n        \"membershipFee\": {\n            \"amount\": 59,\n            \"name\": \"Registration Fee\",\n            \"type\": \"REGISTRATION_FEE\"\n        }\n    }\n}"
 						}
 					]
 				},
@@ -634,7 +634,67 @@
 						"method": "GET",
 						"header": []
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Validate Referral code",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/validate/referral-code/:code",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"validate",
+										"referral-code",
+										":code"
+									],
+									"variable": [
+										{
+											"key": "code",
+											"value": "SH-20000101-1"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "61"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"3d-KnM4DWbT98MwwqJ5dIKotCZOb0Y\""
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 14 Jan 2026 11:48:44 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Referral code is invalid\",\n    \"data\": {\n        \"valid\": false\n    }\n}"
+						}
+					]
 				}
 			]
 		}
