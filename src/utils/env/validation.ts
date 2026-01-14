@@ -44,10 +44,18 @@ class EnvironmentVariables {
   @IsString()
   SMTP_PASSWORD: string;
 
-  @IsUrl({ require_protocol: true })
+  @IsUrl({
+    protocols: ['http', 'https'],
+    require_protocol: true,
+    require_tld: false,
+  })
   FRONTEND_URL: string;
 
-  @IsUrl({ require_protocol: true })
+  @IsUrl({
+    protocols: ['http', 'https'],
+    require_protocol: true,
+    require_tld: false,
+  })
   BACKEND_URL: string;
 
   @IsEmail()
