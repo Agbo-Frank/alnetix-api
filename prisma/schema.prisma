@@ -81,6 +81,8 @@ enum PaymentProvider {
 enum PaymentItemType {
   PACKAGE_PURCHASE
   PACKAGE_UPGRADE
+  REGISTRATION_FEE
+  ANNUAL_FEE
 }
 
 enum CommissionStatus {
