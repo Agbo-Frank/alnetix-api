@@ -35,6 +35,8 @@ Table user_profiles {
   first_name String [not null]
   last_name String [not null]
   date_of_birth DateTime [not null]
+  gender String
+  country String
   image String
   userId Int [unique, not null]
   user users [not null]

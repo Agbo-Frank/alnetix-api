@@ -1,5 +1,14 @@
 
-import { IsNotEmpty, IsString, Matches, MinLength, IsEmail, IsDateString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MinLength,
+  IsEmail,
+  IsDateString,
+  IsOptional,
+  IsIn
+} from 'class-validator';
 
 export class ValidateReferralCodeDto {
   @IsString()
@@ -46,20 +55,31 @@ export class LoginDto {
 
 export class RegisterDto {
   @IsEmail()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Email is required" })
   email: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "First name is required" })
   firstName: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Last name is required" })
   lastName: string;
 
   @IsDateString()
   @IsNotEmpty()
   dateOfBirth: string;
+
+  @IsString()
+  @IsNotEmpty({ message: "Gender is required" })
+  @IsIn(['male', 'female'], {
+    message: 'Gender must be one of: male, female',
+  })
+  gender?: string;
+
+  @IsString()
+  @IsNotEmpty({ message: "Country is required" })
+  country?: string;
 
   @IsString()
   @IsNotEmpty()
