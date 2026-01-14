@@ -309,14 +309,16 @@ export class PaymentsService {
       });
 
       // Distribute commissions
-      await this.commissionsService.distributeCommissions(
+      const processedUserIds = await this.commissionsService.distributeCommissions(
         payment.userId,
         payment.id,
         payment.amount,
       );
 
-      // Check and upgrade pools for customer and all ancestors
-      await this.checkAndUpgradePoolsAfterPayment(payment.userId);
+      if (processedUserIds) {
+        // Check and upgrade pools for customer and all ancestors
+        await this.checkAndUpgradePools(processedUserIds);
+      }
 
       return;
     } catch (error) {
@@ -331,57 +333,18 @@ export class PaymentsService {
   /**
    * Check and upgrade pools for customer and all ancestors after payment
    */
-  private async checkAndUpgradePoolsAfterPayment(customerId: number): Promise<void> {
+  private async checkAndUpgradePools(affectedUserIds: number[]): Promise<void> {
     try {
-      // Check pool for the customer (their personal turnover increased)
-      await this.poolsService.checkAndUpgradePool(customerId);
+      const pools = await this.prisma.pool.findMany();
 
-      // Get customer to traverse up the referral tree
-      const customer = await this.prisma.user.findUnique({
-        where: { id: customerId },
-        select: { id: true, referred_by_code: true },
-      });
-
-      if (!customer) {
-        return;
+      for (const userId of affectedUserIds) {
+        await this.poolsService.checkAndUpgradePool(userId, pools);
       }
 
-      // Traverse up the referral tree and check pools for all ancestors
-      let currentUser = customer;
-      const processedUserIds = new Set<number>([customerId]);
-
-      while (currentUser?.referred_by_code) {
-        const parent = await this.prisma.user.findFirst({
-          where: { referral_code: currentUser.referred_by_code },
-          select: { id: true, referred_by_code: true },
-        });
-
-        if (!parent) {
-          break;
-        }
-
-        // Prevent circular references
-        if (processedUserIds.has(parent.id)) {
-          break;
-        }
-
-        processedUserIds.add(parent.id);
-
-        // Check pool for this ancestor (their team turnover increased)
-        await this.poolsService.checkAndUpgradePool(parent.id);
-
-        // Move to next parent
-        currentUser = parent;
-      }
-
-      this.logger.info(
-        { customerId, affectedUsers: Array.from(processedUserIds) },
-        'Pool eligibility checked for customer and ancestors',
-      );
+      this.logger.debug('Pool eligibility checked for customer and ancestors');
     } catch (error) {
-      // Log error but don't fail payment completion if pool check fails
       this.logger.error(
-        { err: error, customerId },
+        error,
         'Failed to check and upgrade pools after payment',
       );
     }

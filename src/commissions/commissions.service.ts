@@ -147,11 +147,7 @@ export class CommissionsService {
   /**
    * Distributes both affiliate and unstoppable commissions
    */
-  async distributeCommissions(
-    customerId: number,
-    paymentId: number,
-    amount: number,
-  ): Promise<void> {
+  async distributeCommissions(customerId: number, paymentId: number, amount: number) {
     try {
       const payment = await this.prisma.payment.findUnique({
         where: { id: paymentId },
@@ -168,9 +164,7 @@ export class CommissionsService {
       }
 
       // Use transaction to ensure atomicity
-      await this.prisma.$transaction(async (tx) => {
-        // Update team_turnover for all parents/ancestors
-        await this.updateTeamTurnover(customer, amount, tx);
+      const processedUserIds = await this.prisma.$transaction(async (tx) => {
 
         // Distribute affiliate commissions
         await this.distributeAffiliateCommissions(
@@ -180,24 +174,21 @@ export class CommissionsService {
           tx,
         );
 
-        // // Distribute unstoppable commissions
-        // await this.distributeUnstoppableCommissions(
-        //   customer,
-        //   paymentId,
-        //   amount,
-        //   tx,
-        // );
+        // Update team_turnover for all parents/ancestors
+        return await this.updateTeamTurnover(customer, amount, tx); // Update team_turnover for all parents/ancestors
       });
 
       this.logger.info(
         { customerId, paymentId, amount },
         'Commissions distributed successfully',
       );
+      return Array.from(processedUserIds);
     } catch (error) {
       this.logger.error(
         { err: error, customerId, paymentId, amount },
         'Failed to distribute commissions',
       );
+      return [];
     }
   }
 
@@ -238,40 +229,6 @@ export class CommissionsService {
     }
   }
 
-  private async distributeUnstoppableCommissions(
-    customer: User,
-    paymentId: number,
-    amount: number,
-    tx: PrismaTransaction,
-  ): Promise<void> {
-    const unstoppableBonuses = await this.calculateUnstoppableBonuses(customer, amount, tx);
-
-    // Create commission records and update balances
-    for (const unstoppableBonus of unstoppableBonuses) {
-      if (unstoppableBonus.commission !== null) {
-        await tx.commission.create({
-          data: {
-            type: CommissionType.unstoppable,
-            userId: unstoppableBonus.userId,
-            customerId: customer.id,
-            paymentId,
-            amount,
-            position: unstoppableBonus.pool || '',
-            commission: unstoppableBonus.commission,
-            percentage: unstoppableBonus.bonus || 0,
-          },
-        });
-
-        // Update user balances
-        await this.updateUserBalances(
-          unstoppableBonus.userId,
-          unstoppableBonus.commission,
-          tx,
-        );
-      }
-    }
-  }
-
   /**
    * Update user's commission balance fields
    */
@@ -301,7 +258,7 @@ export class CommissionsService {
     customer: User,
     amount: number,
     tx: PrismaTransaction,
-  ): Promise<void> {
+  ) {
     let currentUser = customer;
 
     const processedUserIds = new Set<number>([customer.id]);
@@ -336,6 +293,8 @@ export class CommissionsService {
       // Move to next parent
       currentUser = parent;
     }
+
+    return processedUserIds;
   }
 
   private async calculateAffiliateBonuses(
@@ -398,81 +357,4 @@ export class CommissionsService {
 
     return affiliateBonuses
   }
-
-  private async calculateUnstoppableBonuses(
-    customer: User,
-    amount: number,
-    tx: PrismaTransaction,
-  ) {
-    const unstoppableBonuses: UnstoppableBonus[] = [];
-
-    if (!customer.referred_by_code) {
-      return unstoppableBonuses;
-    }
-
-    // Find the parent (partner) to start the loop
-    let partner = await tx.user.findFirst({
-      where: { referral_code: customer.referred_by_code },
-      include: {
-        pool: true,
-      },
-    });
-
-    if (!partner) {
-      return unstoppableBonuses; // Parent not found, return empty array
-    }
-
-    let previous_bonus = 0;
-
-    // Loop through parents starting from customer's parent
-    while (partner) {
-      const is_actived = partner.is_active;
-      const is_qualified = Boolean(partner.pool);
-      const unstoppable_bonus = partner.pool;
-
-      let bonus: number | null = null;
-      let commission: number | null = null;
-
-      if (unstoppable_bonus) {
-        if (is_actived && is_qualified) {
-          const temp_bonus =
-            unstoppable_bonus.cumulative_percent - previous_bonus;
-          bonus = temp_bonus > 0 ? temp_bonus : null;
-          if (bonus) {
-            previous_bonus = unstoppable_bonus.cumulative_percent;
-            commission =
-              amount *
-              (COMMISSION_CONSTANTS.referral / 100) *
-              (bonus / 100);
-          }
-        }
-      }
-
-      unstoppableBonuses.push({
-        userId: partner.id,
-        pool: unstoppable_bonus?.name || null,
-        is_qualified,
-        is_actived,
-        default_bonus: unstoppable_bonus?.cumulative_percent ?? 0,
-        bonus,
-        commission,
-      });
-
-      // Move to next parent
-      if (!partner.referred_by_code) {
-        break; // No more parents, stop traversal
-      }
-
-      partner = await tx.user.findFirst({
-        where: { referral_code: partner.referred_by_code },
-        include: {
-          pool: true,
-        },
-      });
-    }
-
-    return unstoppableBonuses;
-  }
-
-
 }
