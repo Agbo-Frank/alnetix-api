@@ -70,6 +70,8 @@ export class AuthService {
             first_name: dto.firstName,
             last_name: dto.lastName,
             date_of_birth: dayjs(dto.dateOfBirth).toDate(),
+            gender: dto.gender,
+            country: dto.country,
           },
         },
       },

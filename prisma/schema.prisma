@@ -52,6 +52,8 @@ model UserProfile {
   first_name    String
   last_name     String
   date_of_birth DateTime
+  gender        String?
+  country       String?
   image String?
   userId        Int      @unique
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
