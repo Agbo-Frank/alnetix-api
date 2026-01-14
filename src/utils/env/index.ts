@@ -3,7 +3,7 @@ import { ConfigService as NestConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AppConfigService {
-  constructor(private configService: NestConfigService) { }
+  constructor(private configService: NestConfigService) {}
 
   get nodeEnv(): string {
     return this.configService.get<string>('NODE_ENV', 'development');
@@ -51,6 +51,14 @@ export class AppConfigService {
 
   get backendUrl(): string {
     return this.configService.get<string>('BACKEND_URL') || '';
+  }
+
+  get whitelistedOrigins(): string[] {
+    const origins = this.configService.get<string>('WHITELISTED_ORIGINS');
+    if (!origins) {
+      return [this.frontendUrl];
+    }
+    return origins.split(',').map((origin) => origin.trim());
   }
 
   get mailFromName(): string {
@@ -101,4 +109,3 @@ export class AppConfigService {
     return this.configService.get<string>('AWS_S3_BUCKET') || '';
   }
 }
-

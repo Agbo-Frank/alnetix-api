@@ -56,7 +56,7 @@ export class MailService {
   }
 
   async sendVerificationEmail(email: string, firstName: string, token: string) {
-    const url = `${this.env.frontendUrl}/verify-email?token=${token}`;
+    const url = `${this.env.frontendUrl}/verify-email/${token}`;
     const html = this.renderTemplate('verification', {
       firstName,
       url,
@@ -78,13 +78,14 @@ export class MailService {
     subject: string;
     html: string;
   }) {
+    console.log({ html });
     try {
-      await this.transporter.sendMail({
-        from: `"${this.env.mailFromName}" <${this.env.mailFromAddress}>`,
-        to: email,
-        subject,
-        html,
-      });
+      // await this.transporter.sendMail({
+      //   from: `"${this.env.mailFromName}" <${this.env.mailFromAddress}>`,
+      //   to: email,
+      //   subject,
+      //   html,
+      // });
     } catch (error) {
       this.logger.error({ err: error, email, subject }, 'SMTP email error');
       throw error;
