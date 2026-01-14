@@ -172,7 +172,6 @@ export class CommissionsService {
         );
 
         // Distribute unstoppable commissions
-
         await this.distributeUnstoppableCommissions(
           customerId,
           paymentId,

@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../prisma/prisma.service';
@@ -357,5 +358,51 @@ export class PaymentsService {
     }
 
     return payment;
+  }
+
+  /**
+   * Simulate payment completion (dev environment only)
+   */
+  async simulatePaymentCompletion(paymentId: number) {
+    if (this.env.isProduction) {
+      throw new ForbiddenException();
+    }
+
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: {
+        items: true,
+        user: {
+          include: { package: true },
+        },
+      },
+    });
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found');
+    }
+
+    const updatedPayment = await this.prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: PaymentStatus.COMPLETED,
+        completed_at: dayjs().toDate(),
+      },
+      include: {
+        items: true,
+        user: {
+          include: { package: true },
+        },
+      },
+    });
+
+    await this.completePayment(updatedPayment);
+
+    this.logger.info(
+      { paymentId: updatedPayment.id },
+      'Payment completion simulated',
+    );
+
+    return { message: 'Payment completion simulated successfully', data: null };
   }
 }

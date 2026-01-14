@@ -6,7 +6,7 @@ Table users {
   id Int [pk, increment]
   email String [unique, not null]
   password String [not null]
-  referral_code String
+  referral_code String [not null]
   referred_by_code String
   is_verified Boolean [not null, default: false]
   is_disabled Boolean [not null, default: false]

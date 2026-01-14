@@ -17,11 +17,11 @@ model User {
   id                  Int       @id @default(autoincrement())
   email               String    @unique
   password            String
-  referral_code       String?
+  referral_code       String
   referred_by_code    String?
   is_verified         Boolean   @default(false)
   is_disabled         Boolean   @default(false)
-  level               String?   @db.Char(1)
+  level               String?   @db.Char(1) @default("1")
   team_turnover       Float     @default(0)
   point               Float     @default(0)
   membership_due_date DateTime?
