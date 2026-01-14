@@ -36,7 +36,7 @@ export interface AffiliateBonus {
 }
 
 export interface UnstoppableBonus extends Omit<AffiliateBonus, 'level' | 'bonus'> {
-  rank: string | null;
+  pool: string | null;
   is_qualified: boolean;
   is_actived: boolean;
   default_bonus: number;

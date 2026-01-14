@@ -180,13 +180,13 @@ export class CommissionsService {
           tx,
         );
 
-        // Distribute unstoppable commissions
-        await this.distributeUnstoppableCommissions(
-          customer,
-          paymentId,
-          amount,
-          tx,
-        );
+        // // Distribute unstoppable commissions
+        // await this.distributeUnstoppableCommissions(
+        //   customer,
+        //   paymentId,
+        //   amount,
+        //   tx,
+        // );
       });
 
       this.logger.info(
@@ -256,7 +256,7 @@ export class CommissionsService {
             customerId: customer.id,
             paymentId,
             amount,
-            position: unstoppableBonus.rank || '',
+            position: unstoppableBonus.pool || '',
             commission: unstoppableBonus.commission,
             percentage: unstoppableBonus.bonus || 0,
           },
@@ -414,7 +414,7 @@ export class CommissionsService {
     let partner = await tx.user.findFirst({
       where: { referral_code: customer.referred_by_code },
       include: {
-        rank: true,
+        pool: true,
       },
     });
 
@@ -427,8 +427,8 @@ export class CommissionsService {
     // Loop through parents starting from customer's parent
     while (partner) {
       const is_actived = partner.is_active;
-      const is_qualified = Boolean(partner.rank);
-      const unstoppable_bonus = partner.rank;
+      const is_qualified = Boolean(partner.pool);
+      const unstoppable_bonus = partner.pool;
 
       let bonus: number | null = null;
       let commission: number | null = null;
@@ -450,7 +450,7 @@ export class CommissionsService {
 
       unstoppableBonuses.push({
         userId: partner.id,
-        rank: unstoppable_bonus?.name || null,
+        pool: unstoppable_bonus?.name || null,
         is_qualified,
         is_actived,
         default_bonus: unstoppable_bonus?.cumulative_percent ?? 0,
@@ -466,7 +466,7 @@ export class CommissionsService {
       partner = await tx.user.findFirst({
         where: { referral_code: partner.referred_by_code },
         include: {
-          rank: true,
+          pool: true,
         },
       });
     }

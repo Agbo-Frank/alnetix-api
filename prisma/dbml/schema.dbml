@@ -24,8 +24,8 @@ Table users {
   payments payments [not null]
   earnedCommissions commissions [not null]
   customerCommissions commissions [not null]
-  rankId String
-  rank ranks
+  poolId Int
+  pool pools
   packageId Int
   package packages
 }
@@ -49,13 +49,12 @@ Table tokens {
   user users [not null]
 }
 
-Table ranks {
-  id String [pk]
+Table pools {
+  id Int [pk, increment]
   name String [not null]
   min_direct_members Int [not null]
-  min_indirect_members Int [not null]
   min_turnover Int [not null]
-  order Int [not null]
+  min_team_turnover Int [not null]
   cumulative_percent Float [not null]
   max_turnover_per_leg Int [not null]
   users users [not null]
@@ -147,7 +146,7 @@ Enum CommissionType {
   unstoppable
 }
 
-Ref: users.rankId > ranks.id
+Ref: users.poolId > pools.id
 
 Ref: users.packageId > packages.id
 
