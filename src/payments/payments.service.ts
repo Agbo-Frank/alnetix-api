@@ -15,6 +15,7 @@ import {
 import { PaymentStatus, PaymentItemType, PaymentProvider, CommissionStatus } from 'src/generated/enums';
 import { AppConfigService } from '../utils/env';
 import { CommissionsService } from '../commissions/commissions.service';
+import { PoolsService } from '../pools/pools.service';
 import dayjs from 'dayjs';
 import { paginate, PaginationParams } from 'src/utils';
 
@@ -26,6 +27,7 @@ export class PaymentsService {
     private readonly env: AppConfigService,
     private readonly logger: PinoLogger,
     private readonly commissionsService: CommissionsService,
+    private readonly poolsService: PoolsService,
   ) {
     this.logger.setContext(PaymentsService.name);
   }
@@ -313,6 +315,9 @@ export class PaymentsService {
         payment.amount,
       );
 
+      // Check and upgrade pools for customer and all ancestors
+      await this.checkAndUpgradePoolsAfterPayment(payment.userId);
+
       return;
     } catch (error) {
       this.logger.error(
@@ -320,6 +325,65 @@ export class PaymentsService {
         'Failed to complete payment',
       );
       throw error;
+    }
+  }
+
+  /**
+   * Check and upgrade pools for customer and all ancestors after payment
+   */
+  private async checkAndUpgradePoolsAfterPayment(customerId: number): Promise<void> {
+    try {
+      // Check pool for the customer (their personal turnover increased)
+      await this.poolsService.checkAndUpgradePool(customerId);
+
+      // Get customer to traverse up the referral tree
+      const customer = await this.prisma.user.findUnique({
+        where: { id: customerId },
+        select: { id: true, referred_by_code: true },
+      });
+
+      if (!customer) {
+        return;
+      }
+
+      // Traverse up the referral tree and check pools for all ancestors
+      let currentUser = customer;
+      const processedUserIds = new Set<number>([customerId]);
+
+      while (currentUser?.referred_by_code) {
+        const parent = await this.prisma.user.findFirst({
+          where: { referral_code: currentUser.referred_by_code },
+          select: { id: true, referred_by_code: true },
+        });
+
+        if (!parent) {
+          break;
+        }
+
+        // Prevent circular references
+        if (processedUserIds.has(parent.id)) {
+          break;
+        }
+
+        processedUserIds.add(parent.id);
+
+        // Check pool for this ancestor (their team turnover increased)
+        await this.poolsService.checkAndUpgradePool(parent.id);
+
+        // Move to next parent
+        currentUser = parent;
+      }
+
+      this.logger.info(
+        { customerId, affectedUsers: Array.from(processedUserIds) },
+        'Pool eligibility checked for customer and ancestors',
+      );
+    } catch (error) {
+      // Log error but don't fail payment completion if pool check fails
+      this.logger.error(
+        { err: error, customerId },
+        'Failed to check and upgrade pools after payment',
+      );
     }
   }
 
