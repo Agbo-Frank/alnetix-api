@@ -98,12 +98,12 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new BadRequestException('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new BadRequestException('Invalid credentials');
     }
 
     if (!user.is_verified) {
@@ -113,7 +113,7 @@ export class AuthService {
     }
 
     if (user.is_disabled) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         'Your account has been disabled. Please contact support.',
       );
     }
@@ -128,6 +128,7 @@ export class AuthService {
           email: user.email,
           firstName: user.profile?.first_name,
           lastName: user.profile?.last_name,
+          packageId: user.packageId
         },
       },
     };
