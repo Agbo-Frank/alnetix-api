@@ -1,0 +1,61 @@
+trigger:
+  - main
+
+stages:
+  # -------------------------- BUILD ----------------------------
+  - stage: Build
+    displayName: 'Build API'
+    jobs:
+      - job: BuildJob
+        pool:
+          name: alnetix-api
+
+        steps:
+          - task: ArchiveFiles@2
+            displayName: 'Archive API'
+            inputs:
+              rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/alnetix-api.zip'
+              replaceExistingArchive: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish API'
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)'
+              artifactName: 'alnetix-api'
+              publishLocation: 'Container'
+
+  # -------------------------- DEPLOY ----------------------------
+  - stage: Deploy
+    displayName: 'Deploy API'
+    dependsOn: Build
+    jobs:
+      - deployment: DeployApi
+        displayName: 'Deploy API'
+        environment: 'Production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: 'alnetix-api'
+                - task: CopyFilesOverSSH@0
+                  displayName: 'Copy files to server'
+                  inputs:
+                    sshEndpoint: 'alnetix-api-ssh'
+                    sourceFolder: '$(Pipeline.Workspace)/alnetix-api'
+                    contents: 'alnetix-api.zip'
+                    targetFolder: '/tmp'
+                    cleanTargetFolder: false
+                    overwrite: true
+                - task: SSH@0
+                  displayName: 'Run deploy script'
+                  inputs:
+                    sshEndpoint: 'alnetix-api-ssh'
+                    runOptions: 'inline'
+                    inline: |
+                      chmod +x ~/deploy/deploy_api.sh
+                      ~/deploy/deploy_api.sh
+                    failOnStdErr: false
