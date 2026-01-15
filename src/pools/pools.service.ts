@@ -1,12 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { PrismaClient, Pool, User } from 'src/generated/client';
+import { Pool, User } from 'src/generated/client';
 import { PinoLogger } from 'nestjs-pino';
-
-type PrismaTransaction = Omit<
-  PrismaClient,
-  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
->;
 
 @Injectable()
 export class PoolsService {

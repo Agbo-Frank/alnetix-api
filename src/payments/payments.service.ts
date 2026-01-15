@@ -282,8 +282,7 @@ export class PaymentsService {
 
     return await this.initiatePayment(
       userId,
-      // totalAmount: 5,
-      5,
+      totalAmount,
       paymentItems,
       user.email,
       dto.currency || 'USD'
