@@ -19,6 +19,8 @@ Table users {
   commission_balance Float [not null, default: 0]
   is_active Boolean [not null, default: true]
   wallet_address String
+  direct_count Int [not null, default: 0]
+  indirect_count Int [not null, default: 0]
   profile user_profiles
   tokens tokens [not null]
   payments payments [not null]

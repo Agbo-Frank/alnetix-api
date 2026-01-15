@@ -3,7 +3,7 @@ import { ConfigService as NestConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AppConfigService {
-  constructor(private configService: NestConfigService) {}
+  constructor(private configService: NestConfigService) { }
 
   get nodeEnv(): string {
     return this.configService.get<string>('NODE_ENV', 'development');

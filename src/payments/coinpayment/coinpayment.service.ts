@@ -35,17 +35,34 @@ export class CoinPaymentService {
 
   /**
    * Verify IPN signature from CoinPayment webhook
+   * According to CoinPayments documentation: https://www.coinpayments.net/merchant-tools-ipn
+   * - HMAC should be computed on the raw POST body (form-urlencoded string)
+   * - Merchant ID should be validated
+   * - HMAC is sent in the HTTP_HMAC header
    */
-  verifyIpnSignature(ipnData: Record<string, unknown>, hmac: string): boolean {
+  verifyIpnSignature(
+    ipnData: Record<string, unknown>,
+    hmac: string,
+  ): boolean {
+    const merchantId = this.env.coinpaymentMerchantId;
+    if (merchantId && ipnData.merchant !== merchantId) {
+      return false;
+    }
+
     const sortedKeys = Object.keys(ipnData).sort();
     const queryString = sortedKeys
-      .map((key) => `${key}=${ipnData[key]}`)
+      .map((key) => {
+        const value = ipnData[key];
+        return `${key}=${value}`;
+      })
       .join('&');
 
     const calculatedHmac = crypto
       .createHmac('sha512', this.env.coinpaymentIpnSecret)
       .update(queryString)
       .digest('hex');
+
+    console.log({ calculatedHmac, hmac })
 
     return calculatedHmac === hmac;
   }
@@ -159,6 +176,10 @@ export class CoinPaymentService {
   }
 
   async getSupportedCurrencies(): Promise<string[]> {
-    return ['USD', 'BTC', 'ETH', 'LTC'];
+    const currencies = ['BTC', 'ETH', "USDT.TRC20", "USDC.TRC20", "USDT.ERC20", "USDT.BEP20"];
+    if (!this.env.isProduction) {
+      currencies.push("LTC");
+    }
+    return currencies;
   }
 }

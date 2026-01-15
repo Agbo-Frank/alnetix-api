@@ -13,7 +13,7 @@ import * as crypto from 'crypto';
 import dayjs from 'dayjs';
 import { MailService } from '../utils/mail/mail.service';
 import { ResetPasswordDto, LoginDto, RegisterDto } from './dto';
-import { TokenType } from 'src/generated/client';
+import { TokenType, User } from 'src/generated/client';
 import { normalizeEmail } from '../utils/helpers';
 
 @Injectable()
@@ -39,6 +39,7 @@ export class AuthService {
 
     const referrer = await this.prisma.user.findFirst({
       where: { referral_code: dto.referralCode },
+      select: { id: true, referred_by_code: true, referral_code: true },
     });
 
     if (!referrer) {
@@ -74,6 +75,9 @@ export class AuthService {
       },
       include: { profile: true },
     });
+
+    // Update referral counts
+    await this.updateReferralCounts(referrer);
 
     const token = await this.createToken(user.id, TokenType.VERIFICATION, 30); // 30 mins
 
@@ -286,5 +290,64 @@ export class AuthService {
     });
 
     return token;
+  }
+
+  /**
+   * Update referral counts when a new user is referred
+   * - Increment direct_count for the referrer
+   * - Increment indirect_count for all ancestors (upline)
+   */
+  private async updateReferralCounts(referrer: Pick<User, 'id' | 'referred_by_code'>): Promise<void> {
+    try {
+      await this.prisma.user.update({
+        where: { id: referrer.id },
+        data: {
+          direct_count: {
+            increment: 1,
+          },
+        },
+      });
+
+      // Find and increment indirect_count for all ancestors
+      await this.incrementIndirectCount(referrer);
+    } catch (error) {
+      this.logger.error(
+        { err: error, referrerId: referrer.id },
+        'Failed to update referral counts',
+      );
+      // Don't throw - registration should still succeed even if count update fails
+    }
+  }
+
+  /**
+   * Recursively increment indirect_count for all ancestors in the referral tree
+   */
+  private async incrementIndirectCount(user: Pick<User, 'id' | 'referred_by_code'>): Promise<void> {
+    if (!user || !user.referred_by_code) {
+      return;
+    }
+
+    // Find the parent user
+    const parent = await this.prisma.user.findFirst({
+      where: { referral_code: user.referred_by_code },
+      select: { id: true, referred_by_code: true, referral_code: true },
+    });
+
+    if (!parent) {
+      return;
+    }
+
+    // Increment indirect_count for the parent
+    await this.prisma.user.update({
+      where: { id: parent.id },
+      data: {
+        indirect_count: {
+          increment: 1,
+        },
+      },
+    });
+
+    // Recursively update ancestors
+    await this.incrementIndirectCount(parent);
   }
 }
