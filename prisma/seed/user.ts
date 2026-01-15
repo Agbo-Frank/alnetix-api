@@ -47,6 +47,9 @@ export default async function seedUsers(prisma: PrismaClient) {
     streamline,
     profile: {
       create: {
+        gender: "male",
+        country: "us",
+        email: normalizedEmail,
         first_name: rootUserFirstName,
         last_name: rootUserLastName,
         date_of_birth: dayjs(rootUserDateOfBirth).toDate(),
