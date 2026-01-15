@@ -11,7 +11,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "node dist/main",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -28,7 +28,7 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:seed": "ts-node --require tsconfig-paths/register prisma/seed/index.ts",
-    "postinstall": "npm run prisma:generate && npm run prisma:migrate:deploy"
+    "postinstall": "npm run prisma:generate && npm run prisma:migrate:deploy && npm run prisma:seed"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.967.0",
