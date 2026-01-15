@@ -16,25 +16,15 @@ export class MailService {
     private readonly env: AppConfigService,
   ) {
     this.logger.setContext(MailService.name);
-    const secure = this.env.smtpSecure;
 
     this.transporter = nodemailer.createTransport({
       host: this.env.smtpHost,
       port: this.env.smtpPort,
-      secure: secure,
+      secure: this.env.smtpPort === 465,
       auth: {
         user: this.env.smtpUser,
         pass: this.env.smtpPassword,
       },
-      debug: true,
-      logger: true,
-      connectionTimeout: 60000,
-      greetingTimeout: 30000,
-      socketTimeout: 60000,
-      tls: {
-        rejectUnauthorized: false,
-      },
-      ...(secure ? { requireTLS: true } : {}),
     });
   }
 
@@ -78,14 +68,13 @@ export class MailService {
     subject: string;
     html: string;
   }) {
-    console.log({ html });
     try {
-      // await this.transporter.sendMail({
-      //   from: `"${this.env.mailFromName}" <${this.env.mailFromAddress}>`,
-      //   to: email,
-      //   subject,
-      //   html,
-      // });
+      await this.transporter.sendMail({
+        from: `"${this.env.mailFromName}" <${this.env.mailFromAddress}>`,
+        to: email,
+        subject,
+        html,
+      });
     } catch (error) {
       this.logger.error({ err: error, email, subject }, 'SMTP email error');
       throw error;

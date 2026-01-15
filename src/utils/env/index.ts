@@ -29,14 +29,6 @@ export class AppConfigService {
     return this.configService.get<number>('SMTP_PORT', 587);
   }
 
-  get smtpSecure(): boolean {
-    const secure = this.configService.get<string>('SMTP_SECURE');
-    if (secure) {
-      return secure === 'true';
-    }
-    return this.smtpPort === 465;
-  }
-
   get smtpUser(): string {
     return this.configService.get<string>('SMTP_USER') || '';
   }
