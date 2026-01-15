@@ -76,9 +76,6 @@ export class AuthService {
       include: { profile: true },
     });
 
-    // Update referral counts
-    await this.updateReferralCounts(referrer);
-
     const token = await this.createToken(user.id, TokenType.VERIFICATION, 30); // 30 mins
 
     await this.mailService.sendVerificationEmail(
@@ -151,6 +148,9 @@ export class AuthService {
     });
 
     await this.prisma.token.delete({ where: { id: tokenRecord.id } });
+
+    // Update referral counts
+    await this.updateReferralCounts(tokenRecord.userId);
 
     return {
       message: 'Email verified successfully. You can now log in.',
@@ -297,8 +297,16 @@ export class AuthService {
    * - Increment direct_count for the referrer
    * - Increment indirect_count for all ancestors (upline)
    */
-  private async updateReferralCounts(referrer: Pick<User, 'id' | 'referred_by_code'>): Promise<void> {
+  private async updateReferralCounts(userId: number): Promise<void> {
     try {
+      const referrer = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, referred_by_code: true, referral_code: true },
+      });
+      if (!referrer) {
+        return;
+      }
+
       await this.prisma.user.update({
         where: { id: referrer.id },
         data: {
@@ -308,14 +316,9 @@ export class AuthService {
         },
       });
 
-      // Find and increment indirect_count for all ancestors
       await this.incrementIndirectCount(referrer);
     } catch (error) {
-      this.logger.error(
-        { err: error, referrerId: referrer.id },
-        'Failed to update referral counts',
-      );
-      // Don't throw - registration should still succeed even if count update fails
+      this.logger.error(error, 'Failed to update referral counts');
     }
   }
 
