@@ -65,5 +65,5 @@ export default async function seedUsers(prisma: PrismaClient) {
     include: { profile: true },
   });
 
-  console.log(`✓ Seeded root user: ${rootUser.email} (ID: ${rootUser.id}, Referral Code: ${rootUser.referral_code})`);
+  console.log(`✓ Seeded root user: ${rootUser.email} (ID: ${rootUser.id},Referral Code: ${rootUser.referral_code})`);
 }
