@@ -299,10 +299,20 @@ export class AuthService {
    */
   private async updateReferralCounts(userId: number): Promise<void> {
     try {
-      const referrer = await this.prisma.user.findUnique({
+      const newUser = await this.prisma.user.findUnique({
         where: { id: userId },
-        select: { id: true, referred_by_code: true, referral_code: true },
+        select: { referred_by_code: true },
       });
+
+      if (!newUser || !newUser?.referred_by_code) {
+        return;
+      }
+
+      const referrer = await this.prisma.user.findFirst({
+        where: { referral_code: newUser.referred_by_code },
+        select: { id: true, referred_by_code: true },
+      });
+
       if (!referrer) {
         return;
       }
@@ -333,7 +343,7 @@ export class AuthService {
     // Find the parent user
     const parent = await this.prisma.user.findFirst({
       where: { referral_code: user.referred_by_code },
-      select: { id: true, referred_by_code: true, referral_code: true },
+      select: { id: true, referred_by_code: true },
     });
 
     if (!parent) {
