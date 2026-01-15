@@ -280,13 +280,18 @@ export class PaymentsService {
       throw new BadRequestException('No payment items to process');
     }
 
-    return await this.initiatePayment(
+    const data = await this.initiatePayment(
       userId,
       totalAmount,
       paymentItems,
       user.email,
       dto.currency || 'USDT.TRC20'
     );
+
+    return {
+      message: "Payment initiated successfully",
+      data
+    }
   }
 
   /**
