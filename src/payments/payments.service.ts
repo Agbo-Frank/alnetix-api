@@ -285,7 +285,7 @@ export class PaymentsService {
       totalAmount,
       paymentItems,
       user.email,
-      dto.currency || 'USD'
+      dto.currency || 'USDT.TRC20'
     );
   }
 

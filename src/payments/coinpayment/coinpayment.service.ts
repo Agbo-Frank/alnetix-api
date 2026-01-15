@@ -62,8 +62,6 @@ export class CoinPaymentService {
       .update(queryString)
       .digest('hex');
 
-    console.log({ calculatedHmac, hmac })
-
     return calculatedHmac === hmac;
   }
 
