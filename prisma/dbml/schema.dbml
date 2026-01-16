@@ -59,7 +59,7 @@ Table pools {
   min_direct_members Int [not null]
   min_turnover Int [not null]
   min_team_turnover Int [not null]
-  cumulative_percent Float [not null]
+  balance Float [not null, default: 0]
   max_turnover_per_leg Int [not null]
   users users [not null]
 }

@@ -115,7 +115,7 @@ model Pool {
   min_direct_members   Int
   min_turnover         Int
   min_team_turnover    Int
-  cumulative_percent   Float
+  balance              Float  @default(0)
   max_turnover_per_leg Int
 
   // Back relation

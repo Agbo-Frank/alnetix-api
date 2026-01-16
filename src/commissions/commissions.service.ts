@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../prisma/prisma.service';
-import { COMMISSION_CONSTANTS } from './commissions.constants';
 import { CommissionType } from 'src/generated/enums';
 import { Prisma, PrismaClient, User } from 'src/generated/client';
 import { AffiliateBonus, GetCommissionsDto, UnstoppableBonus } from './dto';
 import { paginate, PaginationParams } from 'src/utils';
+import { COMMISSION_CONSTANTS } from 'src/utils/constant';
 
 type PrismaTransaction = Omit<
   PrismaClient,
@@ -174,6 +174,9 @@ export class CommissionsService {
           tx,
         );
 
+        // Distribute pool commissions
+        await this.distributePoolCommissions(amount, tx);
+
         // Update team_turnover for all parents/ancestors
         return await this.updateTeamTurnover(customer, amount, tx); // Update team_turnover for all parents/ancestors
       });
@@ -227,6 +230,19 @@ export class CommissionsService {
         );
       }
     }
+  }
+
+  private async distributePoolCommissions(amount: number, tx: PrismaTransaction): Promise<number> {
+    const poolCount = await tx.pool.count()
+    const commission = ((amount * (COMMISSION_CONSTANTS.pool / 100)) / poolCount)
+    await tx.pool.updateMany({
+      data: {
+        balance: {
+          increment: commission,
+        },
+      },
+    });
+    return commission;
   }
 
   /**
@@ -309,8 +325,9 @@ export class CommissionsService {
     let level = 1;
     let count = 1;
     const processedUserIds = new Set<number>([customer.id]);
+    const depth = Object.keys(COMMISSION_CONSTANTS.levels).length;
 
-    while (level <= COMMISSION_CONSTANTS.AFFILIATE_LEVEL_DEPTH) {
+    while (level <= depth) {
       if (!currentUser) {
         break;
       }
@@ -337,7 +354,7 @@ export class CommissionsService {
       processedUserIds.add(parent.id);
 
       // Calculate commission
-      const bonus = COMMISSION_CONSTANTS.levels[Math.min(level, COMMISSION_CONSTANTS.AFFILIATE_LEVEL_DEPTH)];
+      const bonus = COMMISSION_CONSTANTS.levels[String(Math.min(level, depth))];
       const commission = amount *
         (COMMISSION_CONSTANTS.referral / 100) *
         (bonus / 100)
