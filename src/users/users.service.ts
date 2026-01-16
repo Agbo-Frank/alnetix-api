@@ -12,6 +12,7 @@ import {
   ChangePasswordDto,
   UpdateWalletDto,
 } from './dto';
+import { computeIsActive } from '../utils/helpers';
 
 @Injectable()
 export class UsersService {
@@ -36,7 +37,17 @@ export class UsersService {
       },
     });
 
-    return { message: 'User fetched successfully', data: user };
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Add computed is_active field
+    const data = {
+      ...user,
+      is_active: computeIsActive(user),
+    };
+
+    return { message: 'User fetched successfully', data };
   }
 
   async updateProfile(userId: number, dto: UpdateProfileDto) {
@@ -175,6 +186,8 @@ export class UsersService {
         email: true,
         turnover: true,
         team_turnover: true,
+        is_disabled: true,
+        membership_due_date: true,
         profile: {
           select: {
             first_name: true,
@@ -184,9 +197,15 @@ export class UsersService {
       },
     });
 
+    // Add computed is_active field to each member
+    const data = members.map(member => ({
+      ...member,
+      is_active: computeIsActive(member),
+    }));
+
     return {
       message: 'Members fetched successfully',
-      data: members
+      data
     };
   }
 }

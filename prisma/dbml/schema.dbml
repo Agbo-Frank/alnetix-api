@@ -17,7 +17,6 @@ Table users {
   membership_due_date DateTime
   commission_earned Float [not null, default: 0]
   commission_balance Float [not null, default: 0]
-  is_active Boolean [not null, default: true]
   wallet_address String
   direct_count Int [not null, default: 0]
   indirect_count Int [not null, default: 0]
@@ -60,6 +59,7 @@ Table pools {
   min_turnover Int [not null]
   min_team_turnover Int [not null]
   balance Float [not null, default: 0]
+  revenue Float [not null, default: 0]
   max_turnover_per_leg Int [not null]
   users users [not null]
 }

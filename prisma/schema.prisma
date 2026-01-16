@@ -28,7 +28,6 @@ model User {
   membership_due_date DateTime?
   commission_earned   Float     @default(0)
   commission_balance  Float     @default(0)
-  is_active           Boolean   @default(true)
   wallet_address      String?
   direct_count        Int       @default(0)
   indirect_count      Int       @default(0)
@@ -116,6 +115,7 @@ model Pool {
   min_turnover         Int
   min_team_turnover    Int
   balance              Float  @default(0)
+  revenue              Float  @default(0)
   max_turnover_per_leg Int
 
   // Back relation
