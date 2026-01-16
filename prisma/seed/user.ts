@@ -38,7 +38,15 @@ export default async function seedUsers(prisma: PrismaClient) {
   const streamlineCount = await prisma.user.count();
   const streamline = streamlineCount + 1;
 
-  const data = {
+  const profileData = {
+    gender: "male",
+    country: "us",
+    first_name: rootUserFirstName,
+    last_name: rootUserLastName,
+    date_of_birth: dayjs(rootUserDateOfBirth).toDate(),
+  };
+
+  const createData = {
     email: normalizedEmail,
     password: hashedPassword,
     referral_code: referralCode,
@@ -46,22 +54,30 @@ export default async function seedUsers(prisma: PrismaClient) {
     is_verified: true, // Root user is pre-verified
     streamline,
     profile: {
-      create: {
-        gender: "male",
-        country: "us",
-        email: normalizedEmail,
-        first_name: rootUserFirstName,
-        last_name: rootUserLastName,
-        date_of_birth: dayjs(rootUserDateOfBirth).toDate(),
+      create: profileData,
+    },
+  };
+
+  const updateData = {
+    email: normalizedEmail,
+    password: hashedPassword,
+    referral_code: referralCode,
+    referred_by_code: null,
+    is_verified: true,
+    streamline,
+    profile: {
+      upsert: {
+        create: profileData,
+        update: profileData,
       },
     },
-  }
+  };
 
   // Create root user
   const rootUser = await prisma.user.upsert({
-    where: { email: data.email },
-    update: data,
-    create: data,
+    where: { email: normalizedEmail },
+    update: updateData,
+    create: createData,
     include: { profile: true },
   });
 

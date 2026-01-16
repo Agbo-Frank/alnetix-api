@@ -8,7 +8,6 @@ export default async function seedPools(prisma: PrismaClient) {
       min_direct_members: 0,
       min_turnover: 100,
       min_team_turnover: 200,
-      cumulative_percent: 3,
       max_turnover_per_leg: 100,
     },
     {
@@ -17,7 +16,6 @@ export default async function seedPools(prisma: PrismaClient) {
       min_direct_members: 0,
       min_turnover: 500,
       min_team_turnover: 2000,
-      cumulative_percent: 3,
       max_turnover_per_leg: 1000,
     },
     {
@@ -26,7 +24,6 @@ export default async function seedPools(prisma: PrismaClient) {
       min_direct_members: 0,
       min_turnover: 500,
       min_team_turnover: 5000,
-      cumulative_percent: 3,
       max_turnover_per_leg: 2500,
     },
     {
@@ -35,7 +32,6 @@ export default async function seedPools(prisma: PrismaClient) {
       min_direct_members: 0,
       min_turnover: 2000,
       min_team_turnover: 25000,
-      cumulative_percent: 3,
       max_turnover_per_leg: 12500,
     },
     {
@@ -44,7 +40,6 @@ export default async function seedPools(prisma: PrismaClient) {
       min_direct_members: 0,
       min_turnover: 5000,
       min_team_turnover: 50000,
-      cumulative_percent: 3,
       max_turnover_per_leg: 25000,
     },
     {
@@ -53,7 +48,6 @@ export default async function seedPools(prisma: PrismaClient) {
       min_direct_members: 0,
       min_turnover: 5000,
       min_team_turnover: 1000000,
-      cumulative_percent: 3,
       max_turnover_per_leg: 500000,
     },
     {
@@ -62,7 +56,6 @@ export default async function seedPools(prisma: PrismaClient) {
       min_direct_members: 6,
       min_turnover: 10000,
       min_team_turnover: 250000,
-      cumulative_percent: 3,
       max_turnover_per_leg: 125000,
     },
     {
@@ -71,7 +64,6 @@ export default async function seedPools(prisma: PrismaClient) {
       min_direct_members: 6,
       min_turnover: 25000,
       min_team_turnover: 800000,
-      cumulative_percent: 3,
       max_turnover_per_leg: 400000,
     },
     {
@@ -80,7 +72,6 @@ export default async function seedPools(prisma: PrismaClient) {
       min_direct_members: 7,
       min_turnover: 250000,
       min_team_turnover: 2500000,
-      cumulative_percent: 3,
       max_turnover_per_leg: 1250000,
     },
     {
@@ -89,16 +80,16 @@ export default async function seedPools(prisma: PrismaClient) {
       min_direct_members: 7,
       min_turnover: 250000,
       min_team_turnover: 10000000,
-      cumulative_percent: 3,
       max_turnover_per_leg: 5000000,
     }
   ];
 
   for (const pool of pools) {
+    const { id, ...rest } = pool;
     const createdPool = await prisma.pool.upsert({
       where: { id: pool.id },
-      update: pool,
-      create: pool,
+      update: rest,
+      create: rest,
     });
     console.log(`✓ Seeded pool: ${createdPool.name} (ID: ${createdPool.id})`);
   }

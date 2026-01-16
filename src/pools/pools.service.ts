@@ -10,6 +10,14 @@ export class PoolsService {
     private readonly logger: PinoLogger
   ) { }
 
+  async getPools() {
+    const data = await this.prisma.pool.findMany();
+
+    return {
+      data,
+      message: "Pools fetched successfully",
+    }
+  }
 
   async checkAndUpgradePool(userId: number, pools: Pool[]) {
     const user = await this.prisma.user.findUnique({

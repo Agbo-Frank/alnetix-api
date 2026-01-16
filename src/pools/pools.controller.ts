@@ -9,4 +9,8 @@ import { User } from 'src/generated/client';
 export class PoolsController {
   constructor(private poolsService: PoolsService) { }
 
+  @Get()
+  getPools() {
+    return this.poolsService.getPools();
+  }
 }
