@@ -41,7 +41,6 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // Add computed is_active field
     const data = {
       ...user,
       is_active: computeIsActive(user),
@@ -197,7 +196,6 @@ export class UsersService {
       },
     });
 
-    // Add computed is_active field to each member
     const data = members.map(member => ({
       ...member,
       is_active: computeIsActive(member),
